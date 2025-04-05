@@ -18,6 +18,7 @@ const cGreen = Color.fromRGBO(0, 145, 0, 1);
 const cGold = Color(0xFFA99A86);
 
 const cGray = Color.fromRGBO(205, 205, 205, 1);
+const cLightGray = Color(0xFFF2F2F2);
 const cLightRed = Color.fromRGBO(235, 87, 87, 1);
 const cBlue = Color.fromRGBO(47, 128, 237, 1);
 const cBlueClickable = Color.fromRGBO(75, 143, 252, 1);
@@ -32,6 +33,8 @@ const cYellow = Color.fromRGBO(251, 255, 78, 1);
 const cCream = Color.fromRGBO(255, 240, 201, 1);
 const cDarkBlue = Color.fromRGBO(34, 19, 68, 1);
 const cLightBlue = Color.fromRGBO(10, 249, 242, 1);
+
+const cOrange = Color(0xFFFF9800);
 
 Color adjustOpacity(Color color, double opacity) {
   double red = color.r;

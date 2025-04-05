@@ -67,7 +67,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: cTransparent,
       builder:
           (context) => ActivityDetailModal(
             activity: activity,
@@ -110,7 +110,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
       },
       child: Scaffold(
         key: const ValueKey(UserActivitiesView.routeName),
-        backgroundColor: cWhite,
+        backgroundColor: cLightGray,
         appBar: AppBar(
           backgroundColor: cWhite,
           elevation: 0,
@@ -175,7 +175,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                           backgroundColor: cBlack,
                           foregroundColor: cWhite,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.zero,
                           ),
                         ),
                         child: Padding(

@@ -22,11 +22,11 @@ class ActivityCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         child: Container(
           decoration: BoxDecoration(
             color: cWhite,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.zero,
             boxShadow: [
               BoxShadow(
                 color: adjustOpacity(cBlack, 0.1),
@@ -41,10 +41,7 @@ class ActivityCard extends StatelessWidget {
               Container(
                 height: 140,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
+                  borderRadius: BorderRadius.zero,
                   image: DecorationImage(
                     image: AssetImage(activity.imagePath),
                     fit: BoxFit.cover,
@@ -67,7 +64,7 @@ class ActivityCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: adjustOpacity(cBlack, 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.zero,
                           ),
                           child: Text(
                             "${activity.startTime} - ${activity.endTime}",

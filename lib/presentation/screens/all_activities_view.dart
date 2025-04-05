@@ -93,7 +93,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: cTransparent,
       builder:
           (context) => ActivityDetailModal(
             activity: activity,
@@ -201,7 +201,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: cWhite,
+      backgroundColor: cLightGray,
       appBar: AppBar(
         backgroundColor: cWhite,
         elevation: 0,
@@ -223,27 +223,27 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                       vertical: 8,
                     ),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
                       decoration: BoxDecoration(
-                        color: adjustOpacity(cBlack, 0.05),
-                        borderRadius: BorderRadius.circular(8),
+                        color: cWhite,
+                        border: Border.all(color: cGray),
+                        borderRadius: BorderRadius.zero,
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.search, color: cBlack),
-                          const SizedBox(width: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: Icon(Icons.search, color: adjustOpacity(cBlack, 0.6)),
+                          ),
                           Expanded(
                             child: TextField(
                               controller: _searchController,
                               decoration: InputDecoration(
                                 hintText: _uiTexts.searchActivities,
-                                hintStyle: styleRegular(color: cGray),
+                                hintStyle: styleRegular(color: adjustOpacity(cBlack, 0.6)),
                                 border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                               ),
-                              style: styleRegular(),
+                              style: styleRegular(color: cBlack),
                               onChanged: (value) {
                                 setState(() {
                                   _searchQuery = value;
@@ -253,15 +253,18 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             ),
                           ),
                           if (_searchQuery.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                  _applyFilter();
-                                });
-                              },
-                              child: const Icon(Icons.clear, color: cGray),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchQuery = '';
+                                    _applyFilter();
+                                  });
+                                },
+                                child: Icon(Icons.clear, color: adjustOpacity(cBlack, 0.6)),
+                              ),
                             ),
                         ],
                       ),
@@ -330,9 +333,9 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                                   color:
                                                       isEnrolled
                                                           ? cGreen
-                                                          : Colors.orange,
+                                                          : cOrange,
                                                   borderRadius:
-                                                      BorderRadius.circular(20),
+                                                      BorderRadius.zero,
                                                 ),
                                                 child: Text(
                                                   isEnrolled

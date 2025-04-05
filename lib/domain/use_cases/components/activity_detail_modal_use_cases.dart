@@ -17,7 +17,13 @@ class ActivityDetailModalUseCases {
   }
 
   // Get appropriate background color for the action button
-  Color getActionButtonColor(bool isUserEnrolled, Activity? conflictingActivity, Color defaultColor, Color cancelColor, Color warningColor) {
+  Color getActionButtonColor(
+    bool isUserEnrolled,
+    Activity? conflictingActivity,
+    Color defaultColor,
+    Color cancelColor,
+    Color warningColor,
+  ) {
     if (isUserEnrolled) {
       return cancelColor; // Red for cancellation
     } else if (conflictingActivity != null) {
@@ -26,4 +32,4 @@ class ActivityDetailModalUseCases {
       return defaultColor; // Default color (usually black)
     }
   }
-} 
+}

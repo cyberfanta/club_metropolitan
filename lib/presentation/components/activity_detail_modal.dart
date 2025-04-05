@@ -34,7 +34,7 @@ class ActivityDetailModal extends StatelessWidget {
       margin: EdgeInsets.only(top: top),
       decoration: const BoxDecoration(
         color: cWhite,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.zero,
       ),
       child: Stack(
         children: [
@@ -59,8 +59,7 @@ class ActivityDetailModal extends StatelessWidget {
               // Activity image
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                child: ClipRect(
                   child: Image.asset(
                     activity.imagePath,
                     height: 200,
@@ -87,7 +86,7 @@ class ActivityDetailModal extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: adjustOpacity(cBlack, 0.08),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.zero,
                             ),
                             child: Row(
                               children: [
@@ -108,7 +107,7 @@ class ActivityDetailModal extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: adjustOpacity(cBlack, 0.08),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.zero,
                             ),
                             child: Row(
                               children: [
@@ -193,9 +192,9 @@ class ActivityDetailModal extends StatelessWidget {
                           margin: const EdgeInsets.only(top: 24),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: adjustOpacity(Colors.orange, 0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.orange, width: 1),
+                            color: adjustOpacity(cOrange, 0.2),
+                            borderRadius: BorderRadius.zero,
+                            border: Border.all(color: cOrange, width: 1),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,12 +203,12 @@ class ActivityDetailModal extends StatelessWidget {
                                 children: [
                                   const Icon(
                                     Icons.warning_amber_rounded,
-                                    color: Colors.orange,
+                                    color: cOrange,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     uiTexts.timeConflict,
-                                    style: styleBold(color: Colors.orange),
+                                    style: styleBold(color: cOrange),
                                   ),
                                 ],
                               ),
@@ -258,11 +257,11 @@ class ActivityDetailModal extends StatelessWidget {
                     conflictingActivity,
                     cBlack,
                     cRed,
-                    Colors.orange,
+                    cOrange,
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
                 child: Text(
