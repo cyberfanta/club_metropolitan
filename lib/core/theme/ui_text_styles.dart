@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'ui_colors.dart';
 
-const String _defaultFontFamily = "Lato";
-const Color _defaultFontColor = cWhite;
-const double _defaultFontSize = 12;
+const String _defaultFontFamily = "CreatoDisplay";
+const Color _defaultFontColor = cBlack;
+const double _defaultFontSize = 16;
 const Map<int, FontWeight> _fontWeightMap = {
   100: FontWeight.w100,
   200: FontWeight.w200,
@@ -26,22 +26,10 @@ List<Shadow> _defaultOutline([
   Color colorOutline = defaultOutlineColor,
 ]) {
   return [
-    Shadow(
-      offset: Offset(-strokeWidth, -strokeWidth),
-      color: colorOutline,
-    ),
-    Shadow(
-      offset: Offset(strokeWidth, -strokeWidth),
-      color: colorOutline,
-    ),
-    Shadow(
-      offset: Offset(strokeWidth, strokeWidth),
-      color: colorOutline,
-    ),
-    Shadow(
-      offset: Offset(-strokeWidth, strokeWidth),
-      color: colorOutline,
-    ),
+    Shadow(offset: Offset(-strokeWidth, -strokeWidth), color: colorOutline),
+    Shadow(offset: Offset(strokeWidth, -strokeWidth), color: colorOutline),
+    Shadow(offset: Offset(strokeWidth, strokeWidth), color: colorOutline),
+    Shadow(offset: Offset(-strokeWidth, strokeWidth), color: colorOutline),
   ];
 }
 
@@ -49,8 +37,15 @@ FontWeight _getFontWeight(int weight) {
   return _fontWeightMap[weight] ?? FontWeight.normal;
 }
 
-TextStyle _buildTextStyle(Color color, double fontSize, int fontWeight,
-    String fontFamily, bool useItalic, bool useUnderline, bool useOutline) {
+TextStyle _buildTextStyle(
+  Color color,
+  double fontSize,
+  int fontWeight,
+  String fontFamily,
+  bool useItalic,
+  bool useUnderline,
+  bool useOutline,
+) {
   return TextStyle(
     color: color,
     fontSize: fontSize,
@@ -65,7 +60,15 @@ TextStyle _buildTextStyle(Color color, double fontSize, int fontWeight,
 }
 
 TextStyle defaultTextStyle() {
-  return _buildTextStyle(_defaultFontColor, _defaultFontSize, 400, _defaultFontFamily, false, false, false);
+  return _buildTextStyle(
+    _defaultFontColor,
+    _defaultFontSize,
+    400,
+    _defaultFontFamily,
+    false,
+    false,
+    false,
+  );
 }
 
 TextStyle styleByNumber(
@@ -77,7 +80,15 @@ TextStyle styleByNumber(
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, fontWeight, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    fontWeight,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleThin([
@@ -88,7 +99,15 @@ TextStyle styleThin([
   bool useUnderline = false,
   bool useOutline = false,
 ]) {
-  return _buildTextStyle(color, fontSize, 100, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    100,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleExtraLight([
@@ -99,7 +118,15 @@ TextStyle styleExtraLight([
   bool useUnderline = false,
   bool useOutline = false,
 ]) {
-  return _buildTextStyle(color, fontSize, 200, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    200,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleLight({
@@ -110,7 +137,15 @@ TextStyle styleLight({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 300, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    300,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleRegular({
@@ -121,7 +156,15 @@ TextStyle styleRegular({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 400, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    400,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleMedium({
@@ -132,7 +175,15 @@ TextStyle styleMedium({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 500, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    500,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleSemiBold({
@@ -143,7 +194,15 @@ TextStyle styleSemiBold({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 600, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    600,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleBold({
@@ -154,7 +213,15 @@ TextStyle styleBold({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 700, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    700,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleExtraBold({
@@ -165,7 +232,15 @@ TextStyle styleExtraBold({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 800, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    800,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }
 
 TextStyle styleBlack({
@@ -176,5 +251,13 @@ TextStyle styleBlack({
   bool useUnderline = false,
   bool useOutline = false,
 }) {
-  return _buildTextStyle(color, fontSize, 900, fontFamily, useItalic, useUnderline, useOutline);
+  return _buildTextStyle(
+    color,
+    fontSize,
+    900,
+    fontFamily,
+    useItalic,
+    useUnderline,
+    useOutline,
+  );
 }

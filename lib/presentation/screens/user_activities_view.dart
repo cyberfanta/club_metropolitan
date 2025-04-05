@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
+import '../../core/theme/ui_text_styles.dart';
 import '../../data/services/data_service.dart';
 import '../../domain/models/activity.dart';
 import '../../domain/use_cases/screens/user_activities_view_use_cases.dart';
+import '../../utils/stamp.dart';
 import '../components/activity_card.dart';
 import '../components/activity_detail_modal.dart';
 import 'all_activities_view.dart';
@@ -20,29 +22,30 @@ class UserActivitiesView extends StatefulWidget {
 }
 
 class _UserActivitiesViewState extends State<UserActivitiesView> {
-  String tag = UserActivitiesView.routeName.substring(
-    1,
-    UserActivitiesView.routeName.length,
-  );
-
-  UserActivitiesViewUseCases userActivitiesViewUseCases =
-      UserActivitiesViewUseCases();
-      
   final DataService _dataService = DataService();
+  final UserActivitiesViewUseCases _useCases = UserActivitiesViewUseCases();
   List<Activity> _userActivities = [];
   bool _isLoading = true;
-  
+
+  late UiTexts _uiTexts;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _uiTexts = Provider.of<UiTexts>(context);
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUserActivities();
   }
-  
+
   Future<void> _loadUserActivities() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       final activities = await _dataService.getUserActivities();
       setState(() {
@@ -53,7 +56,8 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading user activities: $e');
+
+      stamp('UserActivitiesView', 'Error loading user activities: $e');
     }
   }
 
@@ -64,28 +68,30 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ActivityDetailModal(
-        activity: activity,
-        isUserEnrolled: true,
-        onAction: () async {
-          // Cancelar inscripción
-          final success = await _dataService.cancelEnrollment(activity.id);
-          if (success) {
-            setState(() {
-              _userActivities.removeWhere((item) => item.id == activity.id);
-            });
-          }
-          Navigator.pop(context);
-        },
-        actionLabel: 'Cancelar inscripción',
-      ),
+      builder:
+          (context) => ActivityDetailModal(
+            activity: activity,
+            isUserEnrolled: true,
+            onAction: () async {
+              // Cancel enrollment
+              final success = await _dataService.cancelEnrollment(activity.id);
+
+              if (success) {
+                setState(() {
+                  _userActivities.removeWhere((item) => item.id == activity.id);
+                });
+              }
+
+              // ignore: use_build_context_synchronously
+              Navigator.pop(context);
+            },
+            actionLabel: _uiTexts.cancelEnrollment,
+          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    UiTexts uiTexts = Provider.of<UiTexts>(context);
-    
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (value, _) async {
@@ -93,7 +99,14 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
           return;
         }
 
-        await userActivitiesViewUseCases.backActions(tag, context, uiTexts)();
+        await _useCases.backActions(
+          UserActivitiesView.routeName.substring(
+            1,
+            UserActivitiesView.routeName.length,
+          ),
+          context,
+          _uiTexts,
+        )();
       },
       child: Scaffold(
         key: const ValueKey(UserActivitiesView.routeName),
@@ -101,14 +114,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
         appBar: AppBar(
           backgroundColor: cWhite,
           elevation: 0,
-          title: Text(
-            'Mis Actividades',
-            style: TextStyle(
-              fontFamily: 'CreatoDisplay',
-              fontWeight: FontWeight.bold,
-              color: cBlack,
-            ),
-          ),
+          title: Text(_uiTexts.myActivities, style: styleBold(fontSize: 20)),
           actions: [
             IconButton(
               icon: Icon(Icons.list, color: cBlack),
@@ -116,93 +122,90 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AllActivitiesView(
-                      onUserActivitiesChanged: (_) {
-                        _loadUserActivities();
-                      },
-                    ),
+                    builder:
+                        (context) => AllActivitiesView(
+                          onUserActivitiesChanged: (_) {
+                            _loadUserActivities();
+                          },
+                        ),
                   ),
                 );
               },
-              tooltip: 'Ver todas las actividades',
+              tooltip: _uiTexts.viewAllActivities,
             ),
           ],
         ),
-        body: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : _userActivities.isEmpty
+        body:
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _userActivities.isEmpty
                 ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          size: 80,
-                          color: cBlack.withOpacity(0.3),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 80,
+                        color: adjustOpacity(cBlack, 0.3),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _uiTexts.noActivitiesEnrolled,
+                        style: styleRegular(
+                          fontSize: 18,
+                          color: adjustOpacity(cBlack, 0.7),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No tienes actividades inscritas',
-                          style: TextStyle(
-                            fontFamily: 'CreatoDisplay',
-                            fontSize: 18,
-                            color: cBlack.withOpacity(0.7),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => AllActivitiesView(
+                                    onUserActivitiesChanged: (_) {
+                                      _loadUserActivities();
+                                    },
+                                  ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: cBlack,
+                          foregroundColor: cWhite,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AllActivitiesView(
-                                  onUserActivitiesChanged: (_) {
-                                    _loadUserActivities();
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: cBlack,
-                            foregroundColor: cWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            child: Text(
-                              'Explorar actividades',
-                              style: TextStyle(
-                                fontFamily: 'CreatoDisplay',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                          child: Text(
+                            _uiTexts.exploreActivities,
+                            style: styleMedium(),
                           ),
                         ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadUserActivities,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _userActivities.length,
-                      itemBuilder: (context, index) {
-                        final activity = _userActivities[index];
-                        return ActivityCard(
-                          activity: activity,
-                          onTap: () => _showActivityDetail(activity),
-                        );
-                      },
-                    ),
+                      ),
+                    ],
                   ),
+                )
+                : RefreshIndicator(
+                  onRefresh: _loadUserActivities,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _userActivities.length,
+                    itemBuilder: (context, index) {
+                      final activity = _userActivities[index];
+                      return ActivityCard(
+                        activity: activity,
+                        onTap: () => _showActivityDetail(activity),
+                      );
+                    },
+                  ),
+                ),
       ),
     );
   }

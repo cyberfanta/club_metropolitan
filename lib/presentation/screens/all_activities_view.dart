@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
+import '../../core/theme/ui_text_styles.dart';
 import '../../data/services/data_service.dart';
 import '../../domain/models/activity.dart';
+import '../../utils/stamp.dart';
 import '../components/activity_card.dart';
 import '../components/activity_detail_modal.dart';
 
@@ -18,6 +22,7 @@ class AllActivitiesView extends StatefulWidget {
 class _AllActivitiesViewState extends State<AllActivitiesView> {
   final DataService _dataService = DataService();
   List<Activity> _allActivities = [];
+  // ignore: unused_field
   List<Activity> _userActivities = [];
   bool _isLoading = true;
 
@@ -25,6 +30,15 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
   final TextEditingController _searchController = TextEditingController();
   List<Activity> _filteredActivities = [];
   String _searchQuery = '';
+
+  // Agrega UiTexts como variable de clase
+  late UiTexts _uiTexts;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _uiTexts = Provider.of<UiTexts>(context);
+  }
 
   @override
   void initState() {
@@ -57,7 +71,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
       setState(() {
         _isLoading = false;
       });
-      print('Error loading activities: $e');
+      stamp('AllActivitiesView', 'Error loading activities: $e');
     }
   }
 
@@ -114,16 +128,17 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
             onAction:
                 isEnrolled
                     ? () async {
-                      // Cancelar inscripción
+                      // Cancel enrollment
                       final success = await _dataService.cancelEnrollment(
                         activity.id,
                       );
                       if (success) {
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Has cancelado tu inscripción a ${activity.name}',
-                              style: TextStyle(fontFamily: 'CreatoDisplay'),
+                              _uiTexts.enrollmentCancelled(activity.name),
+                              style: styleRegular(),
                             ),
                             backgroundColor: cGray,
                           ),
@@ -134,12 +149,13 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             await _dataService.getUserActivities();
                         widget.onUserActivitiesChanged(userActivities);
                       }
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                       setState(() {}); // Refrescar la UI
                     }
                     : hasConflict
                     ? () async {
-                      // Mostrar diálogo de confirmación para cambiar actividad
+                      // Show confirmation dialog to change activity
                       if (conflictingActivity != null) {
                         final shouldReplace = await showDialog<bool>(
                           context: context,
@@ -147,26 +163,23 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           builder:
                               (context) => AlertDialog(
                                 title: Text(
-                                  '¿Cambiar actividad?',
-                                  style: TextStyle(
-                                    fontFamily: 'CreatoDisplay',
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  _uiTexts.changeActivity,
+                                  style: styleBold(fontSize: 18),
                                 ),
                                 content: Text(
-                                  '¿Deseas cancelar tu inscripción a "${conflictingActivity?.name}" y inscribirte a "${activity.name}"?',
-                                  style: TextStyle(fontFamily: 'CreatoDisplay'),
+                                  _uiTexts.changeActivityQuestion(
+                                    conflictingActivity!.name,
+                                    activity.name,
+                                  ),
+                                  style: styleRegular(),
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed:
                                         () => Navigator.of(context).pop(false),
                                     child: Text(
-                                      'No',
-                                      style: TextStyle(
-                                        fontFamily: 'CreatoDisplay',
-                                        color: cBlack,
-                                      ),
+                                      _uiTexts.no,
+                                      style: styleRegular(),
                                     ),
                                   ),
                                   ElevatedButton(
@@ -177,10 +190,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                     onPressed:
                                         () => Navigator.of(context).pop(true),
                                     child: Text(
-                                      'Sí, cambiar',
-                                      style: TextStyle(
-                                        fontFamily: 'CreatoDisplay',
-                                      ),
+                                      _uiTexts.yesChange,
+                                      style: styleRegular(color: cWhite),
                                     ),
                                   ),
                                 ],
@@ -188,22 +199,26 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                         );
 
                         if (shouldReplace == true) {
-                          // Cancelar la actividad anterior
+                          // Cancel previous activity
                           await _dataService.cancelEnrollment(
                             conflictingActivity.id,
                           );
 
-                          // Inscribir en la nueva actividad
+                          // Enroll in new activity
                           final success = await _dataService.enrollInActivity(
                             activity.id,
                           );
 
                           if (success) {
+                            // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Has cambiado ${conflictingActivity.name} por ${activity.name}',
-                                  style: TextStyle(fontFamily: 'CreatoDisplay'),
+                                  _uiTexts.activityChanged(
+                                    conflictingActivity.name,
+                                    activity.name,
+                                  ),
+                                  style: styleRegular(),
                                 ),
                                 backgroundColor: cGreen,
                               ),
@@ -213,6 +228,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             final userActivities =
                                 await _dataService.getUserActivities();
                             widget.onUserActivitiesChanged(userActivities);
+
+                            // ignore: use_build_context_synchronously
                             Navigator.pop(context);
                             setState(() {}); // Refrescar la UI
                           }
@@ -220,16 +237,17 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                       }
                     }
                     : () async {
-                      // Inscribirse a la actividad
+                      // Enroll in activity
                       final success = await _dataService.enrollInActivity(
                         activity.id,
                       );
                       if (success) {
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Te has inscrito a ${activity.name}',
-                              style: TextStyle(fontFamily: 'CreatoDisplay'),
+                              _uiTexts.enrollmentSuccessful(activity.name),
+                              style: styleRegular(),
                             ),
                             backgroundColor: cGreen,
                           ),
@@ -240,15 +258,17 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             await _dataService.getUserActivities();
                         widget.onUserActivitiesChanged(userActivities);
                       }
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
+
                       setState(() {}); // Refrescar la UI
                     },
             actionLabel:
                 isEnrolled
-                    ? 'Cancelar inscripción'
+                    ? _uiTexts.cancelEnrollment
                     : hasConflict && conflictingActivity != null
-                    ? 'Cambiar ${conflictingActivity.name} por esta actividad'
-                    : 'Inscribirse',
+                    ? _uiTexts.changeActivityFor(conflictingActivity.name)
+                    : _uiTexts.enroll,
           ),
     );
   }
@@ -260,14 +280,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
       appBar: AppBar(
         backgroundColor: cWhite,
         elevation: 0,
-        title: const Text(
-          'Todas las Actividades',
-          style: TextStyle(
-            fontFamily: 'CreatoDisplay',
-            fontWeight: FontWeight.bold,
-            color: cBlack,
-          ),
-        ),
+        title: Text(_uiTexts.allActivities, style: styleBold(fontSize: 20)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: cBlack),
           onPressed: () => Navigator.pop(context),
@@ -278,7 +291,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
               ? const Center(child: CircularProgressIndicator())
               : Column(
                 children: [
-                  // Búsqueda y filtros
+                  // Search and filters
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -290,7 +303,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: cBlack.withOpacity(0.05),
+                        color: adjustOpacity(cBlack, 0.05),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -300,18 +313,12 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           Expanded(
                             child: TextField(
                               controller: _searchController,
-                              decoration: const InputDecoration(
-                                hintText: 'Buscar por nombre, día o entrenador',
-                                hintStyle: TextStyle(
-                                  fontFamily: 'CreatoDisplay',
-                                  color: cGray,
-                                ),
+                              decoration: InputDecoration(
+                                hintText: _uiTexts.searchActivities,
+                                hintStyle: styleRegular(color: cGray),
                                 border: InputBorder.none,
                               ),
-                              style: const TextStyle(
-                                fontFamily: 'CreatoDisplay',
-                                color: cBlack,
-                              ),
+                              style: styleRegular(),
                               onChanged: (value) {
                                 setState(() {
                                   _searchQuery = value;
@@ -336,7 +343,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                     ),
                   ),
 
-                  // Lista de actividades
+                  // Activities list
                   Expanded(
                     child:
                         _filteredActivities.isEmpty
@@ -347,15 +354,13 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                   Icon(
                                     Icons.search_off,
                                     size: 60,
-                                    color: cBlack.withOpacity(0.3),
+                                    color: adjustOpacity(cBlack, 0.3),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No se encontraron actividades',
-                                    style: TextStyle(
-                                      fontFamily: 'CreatoDisplay',
-                                      fontSize: 16,
-                                      color: cBlack.withOpacity(0.7),
+                                    _uiTexts.noActivitiesFound,
+                                    style: styleRegular(
+                                      color: adjustOpacity(cBlack, 0.7),
                                     ),
                                   ),
                                 ],
@@ -407,13 +412,11 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                                 ),
                                                 child: Text(
                                                   isEnrolled
-                                                      ? 'Inscrito'
-                                                      : 'Ajustable',
-                                                  style: const TextStyle(
-                                                    fontFamily: 'CreatoDisplay',
-                                                    color: cWhite,
+                                                      ? _uiTexts.enrolled
+                                                      : _uiTexts.adjustable,
+                                                  style: styleBold(
                                                     fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
+                                                    color: cWhite,
                                                   ),
                                                 ),
                                               ),

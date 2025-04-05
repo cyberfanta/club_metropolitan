@@ -27,4 +27,4 @@ class Trainer {
   }
 
   String get fullName => '$name $lastName';
-} 
+}

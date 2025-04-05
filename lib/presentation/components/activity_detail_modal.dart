@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
+import '../../core/theme/ui_text_styles.dart';
 import '../../domain/models/activity.dart';
+import '../../utils/stamp.dart';
 
 class ActivityDetailModal extends StatelessWidget {
   final Activity activity;
@@ -21,11 +25,13 @@ class ActivityDetailModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final UiTexts uiTexts = Provider.of<UiTexts>(context);
+
     // Obtener el nombre completo del entrenador
     final String trainerFullName =
         activity.trainerName != null
             ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
-            : 'Entrenador no asignado';
+            : uiTexts.trainerNotAssigned;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
@@ -41,20 +47,20 @@ class ActivityDetailModal extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Column(
               children: [
-                // Línea indicadora en la parte superior
+                // Top indicator line
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Container(
                     height: 5,
                     width: 40,
                     decoration: BoxDecoration(
-                      color: cGray.withOpacity(0.5),
+                      color: adjustOpacity(cGray, 0.5),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                 ),
-                
-                // Botón de cerrar
+
+                // Close button
                 Align(
                   alignment: Alignment.topRight,
                   child: Padding(
@@ -66,17 +72,17 @@ class ActivityDetailModal extends StatelessWidget {
                   ),
                 ),
 
-                // Contenido principal
+                // Main content
                 Expanded(
                   child: ListView(
                     controller: scrollController,
                     padding: const EdgeInsets.all(20),
                     children: [
-                      // Imagen de la actividad
+                      // Activity image
                       Container(
                         height: 200,
                         decoration: BoxDecoration(
-                          color: cGray.withOpacity(0.2),
+                          color: adjustOpacity(cGray, 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ClipRRect(
@@ -85,13 +91,15 @@ class ActivityDetailModal extends StatelessWidget {
                             activity.imageAssetPath,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              print(
+                              stamp(
+                                'ActivityDetailModal',
                                 'Error loading image: ${activity.imageAssetPath} - $error',
                               );
+
                               return Center(
                                 child: Icon(
                                   Icons.image_not_supported_outlined,
-                                  color: cBlack.withOpacity(0.3),
+                                  color: adjustOpacity(cBlack, 0.3),
                                   size: 60,
                                 ),
                               );
@@ -101,19 +109,11 @@ class ActivityDetailModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Título y detalles
-                      Text(
-                        activity.name,
-                        style: const TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: cBlack,
-                        ),
-                      ),
+                      // Title and details
+                      Text(activity.name, style: styleBold(fontSize: 24)),
                       const SizedBox(height: 16),
 
-                      // Información de horario
+                      // Schedule information
                       Row(
                         children: [
                           Container(
@@ -122,7 +122,7 @@ class ActivityDetailModal extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: cBlack.withOpacity(0.05),
+                              color: adjustOpacity(cBlack, 0.05),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -134,12 +134,8 @@ class ActivityDetailModal extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  _capitalizeFirstLetter(activity.day),
-                                  style: const TextStyle(
-                                    fontFamily: 'CreatoDisplay',
-                                    fontSize: 14,
-                                    color: cBlack,
-                                  ),
+                                  uiTexts.getDayName(activity.day),
+                                  style: styleRegular(fontSize: 14),
                                 ),
                               ],
                             ),
@@ -151,7 +147,7 @@ class ActivityDetailModal extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: cBlack.withOpacity(0.05),
+                              color: adjustOpacity(cBlack, 0.05),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -164,11 +160,7 @@ class ActivityDetailModal extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Text(
                                   activity.time,
-                                  style: const TextStyle(
-                                    fontFamily: 'CreatoDisplay',
-                                    fontSize: 14,
-                                    color: cBlack,
-                                  ),
+                                  style: styleRegular(fontSize: 14),
                                 ),
                               ],
                             ),
@@ -177,12 +169,12 @@ class ActivityDetailModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Mostrar mensaje de actividad conflictiva si existe
+                      // Show conflicting activity message if exists
                       if (conflictingActivity != null && !isUserEnrolled)
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
+                            color: adjustOpacity(Colors.orange, 0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.orange, width: 1),
                           ),
@@ -196,23 +188,18 @@ class ActivityDetailModal extends StatelessWidget {
                                     color: Colors.orange,
                                   ),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    'Horario coincidente',
-                                    style: TextStyle(
-                                      fontFamily: 'CreatoDisplay',
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
-                                    ),
+                                  Text(
+                                    uiTexts.conflictingSchedule,
+                                    style: styleBold(color: Colors.orange),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Ya estás inscrito en "${conflictingActivity?.name}" el mismo día y hora. Puedes reemplazar esa actividad por esta si lo deseas.',
-                                style: const TextStyle(
-                                  fontFamily: 'CreatoDisplay',
-                                  color: cBlack,
+                                uiTexts.alreadyEnrolledMessage(
+                                  conflictingActivity!.name,
                                 ),
+                                style: styleRegular(),
                               ),
                             ],
                           ),
@@ -220,21 +207,13 @@ class ActivityDetailModal extends StatelessWidget {
                       if (conflictingActivity != null && !isUserEnrolled)
                         const SizedBox(height: 24),
 
-                      // Entrenador
-                      const Text(
-                        'Entrenador',
-                        style: TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: cBlack,
-                        ),
-                      ),
+                      // Trainer
+                      Text(uiTexts.trainer, style: styleBold(fontSize: 18)),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: cBlack.withOpacity(0.05),
+                          color: adjustOpacity(cBlack, 0.05),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -243,7 +222,7 @@ class ActivityDetailModal extends StatelessWidget {
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: cBlack.withOpacity(0.1),
+                                color: adjustOpacity(cBlack, 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -256,12 +235,7 @@ class ActivityDetailModal extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 trainerFullName,
-                                style: const TextStyle(
-                                  fontFamily: 'CreatoDisplay',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: cBlack,
-                                ),
+                                style: styleMedium(fontSize: 16),
                               ),
                             ),
                           ],
@@ -269,29 +243,13 @@ class ActivityDetailModal extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Descripción
-                      const Text(
-                        'Descripción',
-                        style: TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: cBlack,
-                        ),
-                      ),
+                      // Description
+                      Text(uiTexts.description, style: styleBold(fontSize: 18)),
                       const SizedBox(height: 8),
-                      Text(
-                        activity.description,
-                        style: const TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 16,
-                          color: cBlack,
-                          height: 1.5,
-                        ),
-                      ),
+                      Text(activity.description, style: styleRegular()),
                       const SizedBox(height: 32),
 
-                      // Botón de acción (inscribirse o cancelar)
+                      // Action button (enroll or cancel)
                       ElevatedButton(
                         onPressed: onAction,
                         style: ElevatedButton.styleFrom(
@@ -309,11 +267,7 @@ class ActivityDetailModal extends StatelessWidget {
                         ),
                         child: Text(
                           actionLabel,
-                          style: const TextStyle(
-                            fontFamily: 'CreatoDisplay',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: styleMedium(fontSize: 16, color: cWhite),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -326,10 +280,5 @@ class ActivityDetailModal extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 }

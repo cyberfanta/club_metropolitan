@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'core/constants/static_data.dart';
 import 'core/lang/ui_texts.dart';
 import 'core/theme/ui_colors.dart';
-import 'presentation/screens/all_activities_view.dart';
 import 'presentation/screens/user_activities_view.dart';
 
 void main() {
@@ -75,7 +74,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.light(
           primary: cBlack,
           onPrimary: cWhite,
-          background: cWhite,
           surface: cWhite,
           error: cRedError,
         ),
@@ -83,7 +81,6 @@ class MyApp extends StatelessWidget {
       initialRoute: initialRoute,
       routes: {
         UserActivitiesView.routeName: (context) => const UserActivitiesView(),
-        // Otras rutas
       },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

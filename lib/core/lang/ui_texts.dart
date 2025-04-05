@@ -14,6 +14,9 @@ class UiTexts extends ChangeNotifier {
   }
 
   String get title {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().title;
+    }
     return UiTextEn().title;
   }
 
@@ -55,5 +58,187 @@ class UiTexts extends ChangeNotifier {
     }
 
     return UiTextEn().appCloseContext;
+  }
+
+  // User Activities View
+  String get myActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().myActivities;
+    }
+    return UiTextEn().myActivities;
+  }
+
+  String get noActivitiesEnrolled {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().noActivitiesEnrolled;
+    }
+    return UiTextEn().noActivitiesEnrolled;
+  }
+
+  String get exploreActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().exploreActivities;
+    }
+    return UiTextEn().exploreActivities;
+  }
+
+  String get viewAllActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().viewAllActivities;
+    }
+    return UiTextEn().viewAllActivities;
+  }
+
+  // All Activities View
+  String get allActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().allActivities;
+    }
+    return UiTextEn().allActivities;
+  }
+
+  String get searchActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().searchActivities;
+    }
+    return UiTextEn().searchActivities;
+  }
+
+  String get noActivitiesFound {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().noActivitiesFound;
+    }
+    return UiTextEn().noActivitiesFound;
+  }
+
+  String get enrolled {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().enrolled;
+    }
+    return UiTextEn().enrolled;
+  }
+
+  String get adjustable {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().adjustable;
+    }
+    return UiTextEn().adjustable;
+  }
+
+  // Activity Detail
+  String get trainer {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().trainer;
+    }
+    return UiTextEn().trainer;
+  }
+
+  String get description {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().description;
+    }
+    return UiTextEn().description;
+  }
+
+  String get cancelEnrollment {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().cancelEnrollment;
+    }
+    return UiTextEn().cancelEnrollment;
+  }
+
+  String get enroll {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().enroll;
+    }
+    return UiTextEn().enroll;
+  }
+
+  String get trainerNotAssigned {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().trainerNotAssigned;
+    }
+    return UiTextEn().trainerNotAssigned;
+  }
+
+  // Dialog texts
+  String get changeActivity {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().changeActivity;
+    }
+    return UiTextEn().changeActivity;
+  }
+
+  String changeActivityQuestion(String activity1, String activity2) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().changeActivityQuestion
+            : UiTextEn().changeActivityQuestion;
+    return template.replaceAll('{0}', activity1).replaceAll('{1}', activity2);
+  }
+
+  String get yesChange {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().yesChange;
+    }
+    return UiTextEn().yesChange;
+  }
+
+  String changeActivityFor(String activityName) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().changeActivityFor
+            : UiTextEn().changeActivityFor;
+    return template.replaceAll('{0}', activityName);
+  }
+
+  String get conflictingSchedule {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().conflictingSchedule;
+    }
+    return UiTextEn().conflictingSchedule;
+  }
+
+  String alreadyEnrolledMessage(String activityName) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().alreadyEnrolledMessage
+            : UiTextEn().alreadyEnrolledMessage;
+    return template.replaceAll('{0}', activityName);
+  }
+
+  // Días de la semana
+  String getDayName(String day) {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().getDayName(day);
+    }
+    return UiTextEn().getDayName(day);
+  }
+
+  // Snackbar messages
+  String enrollmentCancelled(String activityName) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().enrollmentCancelled
+            : UiTextEn().enrollmentCancelled;
+    return template.replaceAll('{0}', activityName);
+  }
+
+  String enrollmentSuccessful(String activityName) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().enrollmentSuccessful
+            : UiTextEn().enrollmentSuccessful;
+    return template.replaceAll('{0}', activityName);
+  }
+
+  String activityChanged(String oldActivity, String newActivity) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().activityChanged
+            : UiTextEn().activityChanged;
+    return template
+        .replaceAll('{0}', oldActivity)
+        .replaceAll('{1}', newActivity);
   }
 }

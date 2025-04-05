@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
+import '../../core/theme/ui_text_styles.dart';
 import '../../domain/models/activity.dart';
+import '../../utils/stamp.dart';
 
 class ActivityCard extends StatelessWidget {
   final Activity activity;
   final VoidCallback onTap;
 
-  const ActivityCard({
-    super.key,
-    required this.activity,
-    required this.onTap,
-  });
+  const ActivityCard({super.key, required this.activity, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final UiTexts uiTexts = Provider.of<UiTexts>(context);
+
     // Obtener el nombre completo del entrenador
-    final String trainerFullName = activity.trainerName != null
-        ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
-        : 'Entrenador no asignado';
+    final String trainerFullName =
+        activity.trainerName != null
+            ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
+            : uiTexts.trainerNotAssigned;
 
     return GestureDetector(
       onTap: onTap,
@@ -29,7 +32,7 @@ class ActivityCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: cBlack.withOpacity(0.08),
+              color: adjustOpacity(cBlack, 0.08),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -38,22 +41,28 @@ class ActivityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Parte superior con imagen
+            // Top section with image
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Container(
                 height: 120,
                 width: double.infinity,
-                color: cGray.withOpacity(0.3),
+                color: adjustOpacity(cGray, 0.3),
                 child: Image.asset(
                   activity.imageAssetPath,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Error loading image: ${activity.imageAssetPath} - $error');
+                    stamp(
+                      'ActivityCard',
+                      'Error loading image: ${activity.imageAssetPath} - $error',
+                    );
+
                     return Center(
                       child: Icon(
                         Icons.image_not_supported_outlined,
-                        color: cBlack.withOpacity(0.3),
+                        color: adjustOpacity(cBlack, 0.3),
                         size: 40,
                       ),
                     );
@@ -61,73 +70,40 @@ class ActivityCard extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // Información de la actividad
+
+            // Activity information
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    activity.name,
-                    style: const TextStyle(
-                      fontFamily: 'CreatoDisplay',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: cBlack,
-                    ),
-                  ),
+                  Text(activity.name, style: styleBold(fontSize: 18)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: cBlack,
-                      ),
+                      const Icon(Icons.calendar_today, size: 16, color: cBlack),
                       const SizedBox(width: 8),
                       Text(
-                        _capitalizeFirstLetter(activity.day),
-                        style: const TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 14,
-                          color: cBlack,
+                        _capitalizeFirstLetter(
+                          uiTexts.getDayName(activity.day),
                         ),
+                        style: styleRegular(fontSize: 14),
                       ),
                       const SizedBox(width: 16),
-                      const Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: cBlack,
-                      ),
+                      const Icon(Icons.access_time, size: 16, color: cBlack),
                       const SizedBox(width: 8),
-                      Text(
-                        activity.time,
-                        style: const TextStyle(
-                          fontFamily: 'CreatoDisplay',
-                          fontSize: 14,
-                          color: cBlack,
-                        ),
-                      ),
+                      Text(activity.time, style: styleRegular(fontSize: 14)),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.person,
-                        size: 16,
-                        color: cBlack,
-                      ),
+                      const Icon(Icons.person, size: 16, color: cBlack),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           trainerFullName,
-                          style: const TextStyle(
-                            fontFamily: 'CreatoDisplay',
-                            fontSize: 14,
-                            color: cBlack,
-                          ),
+                          style: styleRegular(fontSize: 14),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -142,9 +118,9 @@ class ActivityCard extends StatelessWidget {
       ),
     );
   }
-  
+
   String _capitalizeFirstLetter(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
-} 
+}

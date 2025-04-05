@@ -7,8 +7,8 @@ class Activity {
   final List<int> enrolledMembers;
   final String day;
   final String time;
-  
-  // Campos adicionales para la UI
+
+  // Additional fields for UI
   String? trainerName;
   String? trainerLastName;
 
@@ -25,17 +25,17 @@ class Activity {
     this.trainerLastName,
   });
 
-  // Para comparar si dos actividades tienen el mismo horario
+  // To compare if two activities have the same schedule
   bool conflictsWith(Activity other) {
     return day.toLowerCase() == other.day.toLowerCase() && time == other.time;
   }
 
-  // Para verificar si un usuario está inscrito
+  // To check if a user is enrolled
   bool isMemberEnrolled(int memberId) {
     return enrolledMembers.contains(memberId);
   }
 
-  // Factory constructor para crear una actividad desde JSON
+  // Factory constructor to create an activity from JSON
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       id: json['idActividadColectiva'],
@@ -49,21 +49,21 @@ class Activity {
     );
   }
 
-  // Método para obtener la ruta de imagen corregida
+  // Method to get the corrected image path
   String get imageAssetPath {
-    // Corregimos la ruta para referencias a imágenes erróneas
+    // We fix the path for erroneous image references
     String path = imageUrl;
-    
-    // Corregir error en los datos de origen (simages/ -> images/)
+
+    // Fix error in source data (simages/ -> images/)
     if (path.startsWith('simages/')) {
       path = path.replaceFirst('simages/', 'images/');
     }
-    
-    // Asegurarnos de que la ruta comience con 'assets/'
+
+    // Make sure the path starts with 'assets/'
     if (!path.startsWith('assets/')) {
       path = 'assets/$path';
     }
-    
+
     return path;
   }
-} 
+}

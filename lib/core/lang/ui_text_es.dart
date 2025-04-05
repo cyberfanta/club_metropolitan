@@ -1,6 +1,10 @@
 class UiTextEs {
+  String get title {
+    return "Club Metropolitan App Challenge";
+  }
+
   String get yes {
-    return "Si";
+    return "Sí";
   }
 
   String get no {
@@ -12,10 +16,129 @@ class UiTextEs {
   }
 
   String get appCloseSubText {
-    return "¿Estas seguro?";
+    return "¿Estás seguro?";
   }
 
   String get appCloseContext {
-    return "Estas a punto de cerrar la aplicación.";
+    return "Estás a punto de cerrar la aplicación.";
+  }
+
+  // User Activities View
+  String get myActivities {
+    return "Mis Actividades";
+  }
+
+  String get noActivitiesEnrolled {
+    return "No tienes actividades inscritas";
+  }
+
+  String get exploreActivities {
+    return "Explorar actividades";
+  }
+
+  String get viewAllActivities {
+    return "Ver todas las actividades";
+  }
+
+  // All Activities View
+  String get allActivities {
+    return "Todas las Actividades";
+  }
+
+  String get searchActivities {
+    return "Buscar por nombre, día o entrenador";
+  }
+
+  String get noActivitiesFound {
+    return "No se encontraron actividades";
+  }
+
+  String get enrolled {
+    return "Inscrito";
+  }
+
+  String get adjustable {
+    return "Ajustable";
+  }
+
+  // Activity Detail
+  String get trainer {
+    return "Entrenador";
+  }
+
+  String get description {
+    return "Descripción";
+  }
+
+  String get cancelEnrollment {
+    return "Cancelar inscripción";
+  }
+
+  String get enroll {
+    return "Inscribirse";
+  }
+
+  String get trainerNotAssigned {
+    return "Entrenador no asignado";
+  }
+
+  // Dialog texts
+  String get changeActivity {
+    return "¿Cambiar actividad?";
+  }
+
+  String get changeActivityQuestion {
+    return "¿Deseas cancelar tu inscripción a \"{0}\" e inscribirte a \"{1}\"?";
+  }
+
+  String get yesChange {
+    return "Sí, cambiar";
+  }
+
+  String get changeActivityFor {
+    return "Cambiar {0} por esta actividad";
+  }
+
+  String get conflictingSchedule {
+    return "Horario coincidente";
+  }
+
+  String get alreadyEnrolledMessage {
+    return "Ya estás inscrito en \"{0}\" el mismo día y hora. Puedes reemplazar esa actividad por esta si lo deseas.";
+  }
+
+  // Snackbar messages
+  String get enrollmentCancelled {
+    return "Has cancelado tu inscripción a {0}";
+  }
+
+  String get enrollmentSuccessful {
+    return "Te has inscrito a {0}";
+  }
+
+  String get activityChanged {
+    return "Has cambiado {0} por {1}";
+  }
+
+  // Días de la semana
+  String getDayName(String dayKey) {
+    switch (dayKey.toLowerCase()) {
+      case 'lunes':
+        return 'Lunes';
+      case 'martes':
+        return 'Martes';
+      case 'miercoles':
+        return 'Miércoles';
+      case 'jueves':
+        return 'Jueves';
+      case 'viernes':
+        return 'Viernes';
+      case 'sabado':
+        return 'Sábado';
+      case 'domingo':
+        return 'Domingo';
+      default:
+        return dayKey;
+    }
   }
 }

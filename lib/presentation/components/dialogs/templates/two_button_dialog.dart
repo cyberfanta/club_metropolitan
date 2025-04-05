@@ -72,11 +72,11 @@ class TwoButtonDialog extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 0,
-            top: 0,
+            right: 2,
+            top: 2,
             child: IconButton(
               icon: const Icon(Icons.close, size: 20),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: secondButtonAction,
             ),
           ),
         ],
