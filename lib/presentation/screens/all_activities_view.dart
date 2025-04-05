@@ -26,7 +26,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
   List<Activity> _userActivities = [];
   bool _isLoading = true;
 
-  // Para la búsqueda
+  // For search functionality
   final TextEditingController _searchController = TextEditingController();
   List<Activity> _filteredActivities = [];
   String _searchQuery = '';
@@ -97,7 +97,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
     return await _dataService.hasTimeConflict(activity);
   }
 
-  // Obtener la actividad que está en conflicto con la actividad actual
+  // Get the activity that conflicts with the current activity
   Future<Activity?> _getConflictingActivity(Activity activity) async {
     return await _dataService.getConflictingActivity(activity);
   }
@@ -106,7 +106,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
     final bool isEnrolled = _isUserEnrolled(activity);
     final bool hasConflict = await _hasTimeConflict(activity);
 
-    // Obtener la actividad conflictiva si existe
+    // Get conflicting activity if it exists
     Activity? conflictingActivity;
     if (hasConflict) {
       conflictingActivity = await _getConflictingActivity(activity);
@@ -144,14 +144,14 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           ),
                         );
 
-                        // Actualizar la lista de actividades del usuario
+                        // Update user activities list
                         final userActivities =
                             await _dataService.getUserActivities();
                         widget.onUserActivitiesChanged(userActivities);
                       }
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
-                      setState(() {}); // Refrescar la UI
+                      setState(() {}); // Refresh UI
                     }
                     : hasConflict
                     ? () async {
@@ -210,28 +210,14 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           );
 
                           if (success) {
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  _uiTexts.activityChanged(
-                                    conflictingActivity.name,
-                                    activity.name,
-                                  ),
-                                  style: styleRegular(),
-                                ),
-                                backgroundColor: cGreen,
-                              ),
-                            );
-
-                            // Actualizar la lista de actividades del usuario
+                            // Update user activities list
                             final userActivities =
                                 await _dataService.getUserActivities();
                             widget.onUserActivitiesChanged(userActivities);
 
                             // ignore: use_build_context_synchronously
                             Navigator.pop(context);
-                            setState(() {}); // Refrescar la UI
+                            setState(() {}); // Refresh UI
                           }
                         }
                       }
@@ -242,18 +228,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                         activity.id,
                       );
                       if (success) {
-                        // ignore: use_build_context_synchronously
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              _uiTexts.enrollmentSuccessful(activity.name),
-                              style: styleRegular(),
-                            ),
-                            backgroundColor: cGreen,
-                          ),
-                        );
-
-                        // Actualizar la lista de actividades del usuario
+                        // Update user activities list
                         final userActivities =
                             await _dataService.getUserActivities();
                         widget.onUserActivitiesChanged(userActivities);
@@ -261,7 +236,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
 
-                      setState(() {}); // Refrescar la UI
+                      setState(() {}); // Refresh UI
                     },
             actionLabel:
                 isEnrolled

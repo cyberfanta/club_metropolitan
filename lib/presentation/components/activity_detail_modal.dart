@@ -27,7 +27,7 @@ class ActivityDetailModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final UiTexts uiTexts = Provider.of<UiTexts>(context);
 
-    // Obtener el nombre completo del entrenador
+    // Get the trainer's full name
     final String trainerFullName =
         activity.trainerName != null
             ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
