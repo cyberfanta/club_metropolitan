@@ -82,6 +82,18 @@ class UiTextEs {
     return "Entrenador no asignado";
   }
 
+  String get participants {
+    return "participantes";
+  }
+
+  String get timeConflict {
+    return "Conflicto de horario";
+  }
+
+  String get conflictDescription {
+    return "Ya estás inscrito en \"{0}\" el {1} de {2} a {3}. Puedes reemplazar esa actividad por esta si lo deseas.";
+  }
+
   // Dialog texts
   String get changeActivity {
     return "¿Cambiar actividad?";

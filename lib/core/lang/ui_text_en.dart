@@ -82,6 +82,18 @@ class UiTextEn {
     return "Trainer not assigned";
   }
 
+  String get participants {
+    return "participants";
+  }
+
+  String get timeConflict {
+    return "Time Conflict";
+  }
+
+  String get conflictDescription {
+    return "You're already enrolled in \"{0}\" on {1} from {2} to {3}. You can replace that activity with this one if you wish.";
+  }
+
   // Dialog texts
   String get changeActivity {
     return "Change activity?";

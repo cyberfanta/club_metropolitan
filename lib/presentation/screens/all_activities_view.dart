@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
 import '../../core/theme/ui_text_styles.dart';
-import '../../data/services/data_service.dart';
 import '../../domain/models/activity.dart';
-import '../../utils/stamp.dart';
+import '../../domain/use_cases/screens/all_activities_view_use_cases.dart';
 import '../components/activity_card.dart';
 import '../components/activity_detail_modal.dart';
 
@@ -20,10 +19,9 @@ class AllActivitiesView extends StatefulWidget {
 }
 
 class _AllActivitiesViewState extends State<AllActivitiesView> {
-  final DataService _dataService = DataService();
+  final AllActivitiesViewUseCases _useCases = AllActivitiesViewUseCases();
+  
   List<Activity> _allActivities = [];
-  // ignore: unused_field
-  List<Activity> _userActivities = [];
   bool _isLoading = true;
 
   // For search functionality
@@ -31,7 +29,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
   List<Activity> _filteredActivities = [];
   String _searchQuery = '';
 
-  // Agrega UiTexts como variable de clase
+  // Add UiTexts as a class variable
   late UiTexts _uiTexts;
 
   @override
@@ -57,59 +55,35 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
       _isLoading = true;
     });
 
-    try {
-      final allActivities = await _dataService.getActivities();
-      final userActivities = await _dataService.getUserActivities();
+    final result = await _useCases.loadActivities();
 
+    if (result['success']) {
       setState(() {
-        _allActivities = allActivities;
-        _userActivities = userActivities;
+        _allActivities = result['allActivities'];
         _applyFilter();
         _isLoading = false;
       });
-    } catch (e) {
+    } else {
       setState(() {
         _isLoading = false;
       });
-      stamp('AllActivitiesView', 'Error loading activities: $e');
     }
   }
 
   void _applyFilter() {
-    if (_searchQuery.isEmpty) {
-      _filteredActivities = List.from(_allActivities);
-    } else {
-      final query = _searchQuery.toLowerCase();
-      _filteredActivities =
-          _allActivities.where((activity) {
-            return activity.name.toLowerCase().contains(query) ||
-                activity.day.toLowerCase().contains(query) ||
-                (activity.trainerName?.toLowerCase().contains(query) ?? false);
-          }).toList();
-    }
-  }
-
-  bool _isUserEnrolled(Activity activity) {
-    return activity.enrolledMembers.contains(_dataService.currentUserId);
-  }
-
-  Future<bool> _hasTimeConflict(Activity activity) async {
-    return await _dataService.hasTimeConflict(activity);
-  }
-
-  // Get the activity that conflicts with the current activity
-  Future<Activity?> _getConflictingActivity(Activity activity) async {
-    return await _dataService.getConflictingActivity(activity);
+    setState(() {
+      _filteredActivities = _useCases.applyFilter(_allActivities, _searchQuery);
+    });
   }
 
   void _showActivityDetail(Activity activity) async {
-    final bool isEnrolled = _isUserEnrolled(activity);
-    final bool hasConflict = await _hasTimeConflict(activity);
+    final bool isEnrolled = _useCases.isUserEnrolled(activity);
+    final bool hasConflict = await _useCases.hasTimeConflict(activity);
 
     // Get conflicting activity if it exists
     Activity? conflictingActivity;
     if (hasConflict) {
-      conflictingActivity = await _getConflictingActivity(activity);
+      conflictingActivity = await _useCases.getConflictingActivity(activity);
     }
 
     if (!mounted) return;
@@ -129,10 +103,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                 isEnrolled
                     ? () async {
                       // Cancel enrollment
-                      final success = await _dataService.cancelEnrollment(
-                        activity.id,
-                      );
-                      if (success) {
+                      final result = await _useCases.cancelEnrollment(activity);
+                      if (result['success']) {
                         // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -143,11 +115,9 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             backgroundColor: cGray,
                           ),
                         );
-
-                        // Update user activities list
-                        final userActivities =
-                            await _dataService.getUserActivities();
-                        widget.onUserActivitiesChanged(userActivities);
+                        widget.onUserActivitiesChanged(
+                          result['userActivities'],
+                        );
                       }
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
@@ -157,64 +127,37 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                     ? () async {
                       // Show confirmation dialog to change activity
                       if (conflictingActivity != null) {
-                        final shouldReplace = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: true,
-                          builder:
-                              (context) => AlertDialog(
-                                title: Text(
-                                  _uiTexts.changeActivity,
-                                  style: styleBold(fontSize: 18),
-                                ),
+                        final shouldReplace = await _useCases
+                            .showChangeActivityDialog(
+                              context,
+                              _uiTexts,
+                              activity,
+                              conflictingActivity,
+                            );
+
+                        if (shouldReplace) {
+                          final result = await _useCases.changeActivity(
+                            activity,
+                            conflictingActivity,
+                          );
+
+                          if (result['success']) {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
                                 content: Text(
-                                  _uiTexts.changeActivityQuestion(
-                                    conflictingActivity!.name,
-                                    activity.name,
+                                  _uiTexts.activityChanged(
+                                    result['oldActivity'],
+                                    result['newActivity'],
                                   ),
                                   style: styleRegular(),
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.of(context).pop(false),
-                                    child: Text(
-                                      _uiTexts.no,
-                                      style: styleRegular(),
-                                    ),
-                                  ),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: cBlack,
-                                      foregroundColor: cWhite,
-                                    ),
-                                    onPressed:
-                                        () => Navigator.of(context).pop(true),
-                                    child: Text(
-                                      _uiTexts.yesChange,
-                                      style: styleRegular(color: cWhite),
-                                    ),
-                                  ),
-                                ],
+                                backgroundColor: cGreen,
                               ),
-                        );
-
-                        if (shouldReplace == true) {
-                          // Cancel previous activity
-                          await _dataService.cancelEnrollment(
-                            conflictingActivity.id,
-                          );
-
-                          // Enroll in new activity
-                          final success = await _dataService.enrollInActivity(
-                            activity.id,
-                          );
-
-                          if (success) {
-                            // Update user activities list
-                            final userActivities =
-                                await _dataService.getUserActivities();
-                            widget.onUserActivitiesChanged(userActivities);
-
+                            );
+                            widget.onUserActivitiesChanged(
+                              result['userActivities'],
+                            );
                             // ignore: use_build_context_synchronously
                             Navigator.pop(context);
                             setState(() {}); // Refresh UI
@@ -224,26 +167,33 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                     }
                     : () async {
                       // Enroll in activity
-                      final success = await _dataService.enrollInActivity(
-                        activity.id,
-                      );
-                      if (success) {
-                        // Update user activities list
-                        final userActivities =
-                            await _dataService.getUserActivities();
-                        widget.onUserActivitiesChanged(userActivities);
+                      final result = await _useCases.enrollInActivity(activity);
+                      if (result['success']) {
+                        // ignore: use_build_context_synchronously
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _uiTexts.enrollmentSuccessful(activity.name),
+                              style: styleRegular(),
+                            ),
+                            backgroundColor: cGreen,
+                          ),
+                        );
+                        widget.onUserActivitiesChanged(
+                          result['userActivities'],
+                        );
                       }
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
 
                       setState(() {}); // Refresh UI
                     },
-            actionLabel:
-                isEnrolled
-                    ? _uiTexts.cancelEnrollment
-                    : hasConflict && conflictingActivity != null
-                    ? _uiTexts.changeActivityFor(conflictingActivity.name)
-                    : _uiTexts.enroll,
+            actionLabel: _useCases.getActionLabel(
+              _uiTexts,
+              isEnrolled,
+              hasConflict,
+              conflictingActivity,
+            ),
           ),
     );
   }
@@ -348,12 +298,11 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                 itemCount: _filteredActivities.length,
                                 itemBuilder: (context, index) {
                                   final activity = _filteredActivities[index];
-                                  final bool isEnrolled = _isUserEnrolled(
-                                    activity,
-                                  );
+                                  final bool isEnrolled = _useCases
+                                      .isUserEnrolled(activity);
 
                                   return FutureBuilder<bool>(
-                                    future: _hasTimeConflict(activity),
+                                    future: _useCases.hasTimeConflict(activity),
                                     builder: (context, snapshot) {
                                       final bool hasConflict =
                                           snapshot.data ?? false;

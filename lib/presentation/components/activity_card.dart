@@ -5,122 +5,142 @@ import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
 import '../../core/theme/ui_text_styles.dart';
 import '../../domain/models/activity.dart';
-import '../../utils/stamp.dart';
+import '../../domain/use_cases/components/activity_card_use_cases.dart';
 
 class ActivityCard extends StatelessWidget {
   final Activity activity;
   final VoidCallback onTap;
+  final ActivityCardUseCases _useCases = ActivityCardUseCases();
 
-  const ActivityCard({super.key, required this.activity, required this.onTap});
+  ActivityCard({super.key, required this.activity, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final UiTexts uiTexts = Provider.of<UiTexts>(context);
+    final uiTexts = Provider.of<UiTexts>(context);
 
-    // Get the trainer's full name
-    final String trainerFullName =
-        activity.trainerName != null
-            ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
-            : uiTexts.trainerNotAssigned;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: cWhite,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: adjustOpacity(cBlack, 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top section with image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cWhite,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: adjustOpacity(cBlack, 0.1),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
               ),
-              child: Container(
-                height: 120,
-                width: double.infinity,
-                color: adjustOpacity(cGray, 0.3),
-                child: Image.asset(
-                  activity.imageAssetPath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    stamp(
-                      'ActivityCard',
-                      'Error loading image: ${activity.imageAssetPath} - $error',
-                    );
-
-                    return Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        color: adjustOpacity(cBlack, 0.3),
-                        size: 40,
-                      ),
-                    );
-                  },
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  image: DecorationImage(
+                    image: AssetImage(activity.imagePath),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-
-            // Activity information
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(activity.name, style: styleBold(fontSize: 18)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today, size: 16, color: cBlack),
-                      const SizedBox(width: 8),
-                      Text(
-                        _capitalizeFirstLetter(
-                          uiTexts.getDayName(activity.day),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(activity.name, style: styleBold(fontSize: 18)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: adjustOpacity(cBlack, 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "${activity.startTime} - ${activity.endTime}",
+                            style: styleMedium(fontSize: 12),
+                          ),
                         ),
-                        style: styleRegular(fontSize: 14),
-                      ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.access_time, size: 16, color: cBlack),
-                      const SizedBox(width: 8),
-                      Text(activity.time, style: styleRegular(fontSize: 14)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 16, color: cBlack),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          trainerFullName,
-                          style: styleRegular(fontSize: 14),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: adjustOpacity(cBlack, 0.6),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 4),
+                        Text(
+                          _useCases.capitalizeFirstLetter(uiTexts.getDayName(activity.day)),
+                          style: styleRegular(
+                            color: adjustOpacity(cBlack, 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: 16,
+                          color: adjustOpacity(cBlack, 0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _useCases.getTrainerFullName(activity, uiTexts),
+                          style: styleRegular(
+                            color: adjustOpacity(cBlack, 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: adjustOpacity(cBlack, 0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          activity.location,
+                          style: styleRegular(
+                            color: adjustOpacity(cBlack, 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      activity.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: styleRegular(color: adjustOpacity(cBlack, 0.8)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 }

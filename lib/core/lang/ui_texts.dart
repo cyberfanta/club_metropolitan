@@ -161,6 +161,37 @@ class UiTexts extends ChangeNotifier {
     return UiTextEn().trainerNotAssigned;
   }
 
+  String get participants {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().participants;
+    }
+    return UiTextEn().participants;
+  }
+
+  String get timeConflict {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().timeConflict;
+    }
+    return UiTextEn().timeConflict;
+  }
+
+  String conflictDescription(
+    String activityName,
+    String day,
+    String startTime,
+    String endTime,
+  ) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().conflictDescription
+            : UiTextEn().conflictDescription;
+    return template
+        .replaceAll('{0}', activityName)
+        .replaceAll('{1}', day)
+        .replaceAll('{2}', startTime)
+        .replaceAll('{3}', endTime);
+  }
+
   // Dialog texts
   String get changeActivity {
     if (_locale.languageCode == 'es') {

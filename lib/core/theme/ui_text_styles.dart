@@ -45,6 +45,7 @@ TextStyle _buildTextStyle(
   bool useItalic,
   bool useUnderline,
   bool useOutline,
+  double? height,
 ) {
   return TextStyle(
     color: color,
@@ -56,6 +57,7 @@ TextStyle _buildTextStyle(
         useUnderline ? TextDecoration.underline : _defaultTextDecoration,
     decorationColor: useUnderline ? color : null,
     shadows: useOutline ? _defaultOutline() : null,
+    height: height,
   );
 }
 
@@ -68,6 +70,7 @@ TextStyle defaultTextStyle() {
     false,
     false,
     false,
+    null,
   );
 }
 
@@ -79,6 +82,7 @@ TextStyle styleByNumber(
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -88,6 +92,7 @@ TextStyle styleByNumber(
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -98,6 +103,7 @@ TextStyle styleThin([
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 ]) {
   return _buildTextStyle(
     color,
@@ -107,6 +113,7 @@ TextStyle styleThin([
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -117,6 +124,7 @@ TextStyle styleExtraLight([
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 ]) {
   return _buildTextStyle(
     color,
@@ -126,6 +134,7 @@ TextStyle styleExtraLight([
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -136,6 +145,7 @@ TextStyle styleLight({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -145,6 +155,7 @@ TextStyle styleLight({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -155,6 +166,7 @@ TextStyle styleRegular({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -164,6 +176,7 @@ TextStyle styleRegular({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -174,6 +187,7 @@ TextStyle styleMedium({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -183,6 +197,7 @@ TextStyle styleMedium({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -193,6 +208,7 @@ TextStyle styleSemiBold({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -202,6 +218,7 @@ TextStyle styleSemiBold({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -212,6 +229,7 @@ TextStyle styleBold({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -221,6 +239,7 @@ TextStyle styleBold({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -231,6 +250,7 @@ TextStyle styleExtraBold({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -240,6 +260,7 @@ TextStyle styleExtraBold({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }
 
@@ -250,6 +271,7 @@ TextStyle styleBlack({
   bool useItalic = false,
   bool useUnderline = false,
   bool useOutline = false,
+  double? height,
 }) {
   return _buildTextStyle(
     color,
@@ -259,5 +281,6 @@ TextStyle styleBlack({
     useItalic,
     useUnderline,
     useOutline,
+    height,
   );
 }

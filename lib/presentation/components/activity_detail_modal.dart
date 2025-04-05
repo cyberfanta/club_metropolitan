@@ -5,115 +5,79 @@ import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
 import '../../core/theme/ui_text_styles.dart';
 import '../../domain/models/activity.dart';
-import '../../utils/stamp.dart';
+import '../../domain/use_cases/components/activity_detail_modal_use_cases.dart';
 
 class ActivityDetailModal extends StatelessWidget {
   final Activity activity;
   final bool isUserEnrolled;
+  final Activity? conflictingActivity;
   final VoidCallback onAction;
   final String actionLabel;
-  final Activity? conflictingActivity;
+  final ActivityDetailModalUseCases _useCases = ActivityDetailModalUseCases();
 
-  const ActivityDetailModal({
+  ActivityDetailModal({
     super.key,
     required this.activity,
     required this.isUserEnrolled,
+    this.conflictingActivity,
     required this.onAction,
     required this.actionLabel,
-    this.conflictingActivity,
   });
 
   @override
   Widget build(BuildContext context) {
-    final UiTexts uiTexts = Provider.of<UiTexts>(context);
+    final uiTexts = Provider.of<UiTexts>(context);
+    final size = MediaQuery.of(context).size;
+    final double top = size.height * 0.1;
 
-    // Get the trainer's full name
-    final String trainerFullName =
-        activity.trainerName != null
-            ? '${activity.trainerName} ${activity.trainerLastName ?? ""}'
-            : uiTexts.trainerNotAssigned;
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.9,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: cWhite,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Column(
-              children: [
-                // Top indicator line
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Container(
-                    height: 5,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: adjustOpacity(cGray, 0.5),
-                      borderRadius: BorderRadius.circular(3),
+    return Container(
+      margin: EdgeInsets.only(top: top),
+      decoration: const BoxDecoration(
+        color: cWhite,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Stack(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with close button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(activity.name, style: styleBold(fontSize: 22)),
+                    IconButton(
+                      onPressed: () => _useCases.closeModal(context),
+                      icon: const Icon(Icons.close, color: cBlack),
                     ),
+                  ],
+                ),
+              ),
+
+              // Activity image
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    activity.imagePath,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
+              ),
 
-                // Close button
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0, bottom: 8.0),
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: cGray),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ),
-
-                // Main content
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(20),
+              // Activity details
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Activity image
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: adjustOpacity(cGray, 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            activity.imageAssetPath,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              stamp(
-                                'ActivityDetailModal',
-                                'Error loading image: ${activity.imageAssetPath} - $error',
-                              );
-
-                              return Center(
-                                child: Icon(
-                                  Icons.image_not_supported_outlined,
-                                  color: adjustOpacity(cBlack, 0.3),
-                                  size: 60,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Title and details
-                      Text(activity.name, style: styleBold(fontSize: 24)),
-                      const SizedBox(height: 16),
-
-                      // Schedule information
+                      // Time and day
                       Row(
                         children: [
                           Container(
@@ -122,59 +86,114 @@ class ActivityDetailModal extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: adjustOpacity(cBlack, 0.05),
+                              color: adjustOpacity(cBlack, 0.08),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.calendar_today,
-                                  size: 16,
-                                  color: cBlack,
-                                ),
-                                const SizedBox(width: 8),
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 4),
                                 Text(
-                                  uiTexts.getDayName(activity.day),
-                                  style: styleRegular(fontSize: 14),
+                                  "${activity.startTime} - ${activity.endTime}",
+                                  style: styleMedium(fontSize: 14),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: adjustOpacity(cBlack, 0.05),
+                              color: adjustOpacity(cBlack, 0.08),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 16,
-                                  color: cBlack,
-                                ),
-                                const SizedBox(width: 8),
+                                const Icon(Icons.calendar_today, size: 16),
+                                const SizedBox(width: 4),
                                 Text(
-                                  activity.time,
-                                  style: styleRegular(fontSize: 14),
+                                  uiTexts.getDayName(activity.day),
+                                  style: styleMedium(fontSize: 14),
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
 
-                      // Show conflicting activity message if exists
+                      // Location
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              activity.location,
+                              style: styleRegular(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Trainer
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.person, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              _useCases.getTrainerFullName(activity, uiTexts),
+                              style: styleRegular(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Capacity
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.people, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              "${activity.enrolledMembers.length}/${activity.capacity} ${uiTexts.participants}",
+                              style: styleRegular(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Description title
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24),
+                        child: Text(
+                          uiTexts.description,
+                          style: styleBold(fontSize: 18),
+                        ),
+                      ),
+
+                      // Description
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          activity.description,
+                          style: styleRegular(height: 1.5),
+                        ),
+                      ),
+
+                      // Warning about conflicting activity
                       if (conflictingActivity != null && !isUserEnrolled)
                         Container(
+                          margin: const EdgeInsets.only(top: 24),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: adjustOpacity(Colors.orange, 0.1),
+                            color: adjustOpacity(Colors.orange, 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.orange, width: 1),
                           ),
@@ -184,101 +203,77 @@ class ActivityDetailModal extends StatelessWidget {
                               Row(
                                 children: [
                                   const Icon(
-                                    Icons.info_outline,
+                                    Icons.warning_amber_rounded,
                                     color: Colors.orange,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    uiTexts.conflictingSchedule,
+                                    uiTexts.timeConflict,
                                     style: styleBold(color: Colors.orange),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                uiTexts.alreadyEnrolledMessage(
+                                uiTexts.conflictDescription(
                                   conflictingActivity!.name,
+                                  conflictingActivity!.day,
+                                  conflictingActivity!.startTime,
+                                  conflictingActivity!.endTime,
                                 ),
                                 style: styleRegular(),
                               ),
                             ],
                           ),
                         ),
-                      if (conflictingActivity != null && !isUserEnrolled)
-                        const SizedBox(height: 24),
-
-                      // Trainer
-                      Text(uiTexts.trainer, style: styleBold(fontSize: 18)),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: adjustOpacity(cBlack, 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: adjustOpacity(cBlack, 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                color: cBlack,
-                                size: 30,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                trainerFullName,
-                                style: styleMedium(fontSize: 16),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Description
-                      Text(uiTexts.description, style: styleBold(fontSize: 18)),
-                      const SizedBox(height: 8),
-                      Text(activity.description, style: styleRegular()),
-                      const SizedBox(height: 32),
-
-                      // Action button (enroll or cancel)
-                      ElevatedButton(
-                        onPressed: onAction,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isUserEnrolled
-                                  ? cRedError
-                                  : conflictingActivity != null
-                                  ? Colors.orange
-                                  : cBlack,
-                          foregroundColor: cWhite,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          actionLabel,
-                          style: styleMedium(fontSize: 16, color: cWhite),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+
+          // Action button at the bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: cWhite,
+                boxShadow: [
+                  BoxShadow(
+                    color: adjustOpacity(cBlack, 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _useCases.getActionButtonColor(
+                    isUserEnrolled,
+                    conflictingActivity,
+                    cBlack,
+                    cRed,
+                    Colors.orange,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  actionLabel,
+                  style: styleBold(color: cWhite, fontSize: 16),
+                ),
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
