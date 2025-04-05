@@ -68,6 +68,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/entry_data/
 
   fonts:
     - family: CreatoDisplay

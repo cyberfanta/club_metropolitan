@@ -3,7 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
+import '../../data/services/data_service.dart';
+import '../../domain/models/activity.dart';
 import '../../domain/use_cases/screens/user_activities_view_use_cases.dart';
+import '../components/activity_card.dart';
+import '../components/activity_detail_modal.dart';
+import 'all_activities_view.dart';
 
 class UserActivitiesView extends StatefulWidget {
   const UserActivitiesView({super.key});
@@ -22,12 +27,65 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
 
   UserActivitiesViewUseCases userActivitiesViewUseCases =
       UserActivitiesViewUseCases();
+      
+  final DataService _dataService = DataService();
+  List<Activity> _userActivities = [];
+  bool _isLoading = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadUserActivities();
+  }
+  
+  Future<void> _loadUserActivities() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final activities = await _dataService.getUserActivities();
+      setState(() {
+        _userActivities = activities;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error loading user activities: $e');
+    }
+  }
+
+  void _showActivityDetail(Activity activity) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ActivityDetailModal(
+        activity: activity,
+        isUserEnrolled: true,
+        onAction: () async {
+          // Cancelar inscripción
+          final success = await _dataService.cancelEnrollment(activity.id);
+          if (success) {
+            setState(() {
+              _userActivities.removeWhere((item) => item.id == activity.id);
+            });
+          }
+          Navigator.pop(context);
+        },
+        actionLabel: 'Cancelar inscripción',
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     UiTexts uiTexts = Provider.of<UiTexts>(context);
-    // Size screenSize = MediaQuery.of(context).size;
-
+    
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (value, _) async {
@@ -39,9 +97,112 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
       },
       child: Scaffold(
         key: const ValueKey(UserActivitiesView.routeName),
-        resizeToAvoidBottomInset: false,
-        backgroundColor: cBackground,
-        body: SizedBox.shrink(),
+        backgroundColor: cWhite,
+        appBar: AppBar(
+          backgroundColor: cWhite,
+          elevation: 0,
+          title: Text(
+            'Mis Actividades',
+            style: TextStyle(
+              fontFamily: 'CreatoDisplay',
+              fontWeight: FontWeight.bold,
+              color: cBlack,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.list, color: cBlack),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllActivitiesView(
+                      onUserActivitiesChanged: (_) {
+                        _loadUserActivities();
+                      },
+                    ),
+                  ),
+                );
+              },
+              tooltip: 'Ver todas las actividades',
+            ),
+          ],
+        ),
+        body: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : _userActivities.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          size: 80,
+                          color: cBlack.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No tienes actividades inscritas',
+                          style: TextStyle(
+                            fontFamily: 'CreatoDisplay',
+                            fontSize: 18,
+                            color: cBlack.withOpacity(0.7),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AllActivitiesView(
+                                  onUserActivitiesChanged: (_) {
+                                    _loadUserActivities();
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: cBlack,
+                            foregroundColor: cWhite,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Text(
+                              'Explorar actividades',
+                              style: TextStyle(
+                                fontFamily: 'CreatoDisplay',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _loadUserActivities,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _userActivities.length,
+                      itemBuilder: (context, index) {
+                        final activity = _userActivities[index];
+                        return ActivityCard(
+                          activity: activity,
+                          onTap: () => _showActivityDetail(activity),
+                        );
+                      },
+                    ),
+                  ),
       ),
     );
   }

@@ -17,7 +17,7 @@ class UserActivitiesViewUseCases {
 
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         AppCloseDialogUseCases logoutUseCases = AppCloseDialogUseCases();
 

@@ -60,10 +60,26 @@ class TwoButtonDialog extends StatelessWidget {
         side: BorderSide(width: borderWidth, color: borderColor),
       ),
       actionsOverflowAlignment: OverflowBarAlignment.center,
-      title: Text(
-        titleText,
-        style: titleTextStyle,
-        textAlign: TextAlign.center,
+      titlePadding: EdgeInsets.zero,
+      title: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+            child: Text(
+              titleText,
+              style: titleTextStyle,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Positioned(
+            right: 0,
+            top: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ],
       ),
       content: contentWidget,
       actions: [

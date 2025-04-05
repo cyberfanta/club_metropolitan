@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 
 import 'core/constants/static_data.dart';
 import 'core/lang/ui_texts.dart';
+import 'core/theme/ui_colors.dart';
+import 'presentation/screens/all_activities_view.dart';
 import 'presentation/screens/user_activities_view.dart';
 
 void main() {
@@ -48,9 +50,40 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       navigatorKey: navigatorKey,
+      title: 'Club Metropolitan',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: cWhite,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: cWhite,
+          elevation: 0,
+          iconTheme: IconThemeData(color: cBlack),
+          titleTextStyle: TextStyle(
+            fontFamily: 'CreatoDisplay',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: cBlack,
+          ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'CreatoDisplay'),
+          bodyMedium: TextStyle(fontFamily: 'CreatoDisplay'),
+          titleLarge: TextStyle(fontFamily: 'CreatoDisplay'),
+          titleMedium: TextStyle(fontFamily: 'CreatoDisplay'),
+          titleSmall: TextStyle(fontFamily: 'CreatoDisplay'),
+        ),
+        colorScheme: ColorScheme.light(
+          primary: cBlack,
+          onPrimary: cWhite,
+          background: cWhite,
+          surface: cWhite,
+          error: cRedError,
+        ),
+      ),
       initialRoute: initialRoute,
       routes: {
         UserActivitiesView.routeName: (context) => const UserActivitiesView(),
+        // Otras rutas
       },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
