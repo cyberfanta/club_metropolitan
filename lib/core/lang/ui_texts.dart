@@ -187,7 +187,7 @@ class UiTexts extends ChangeNotifier {
             : UiTextEn().conflictDescription;
     return template
         .replaceAll('{0}', activityName)
-        .replaceAll('{1}', day)
+        .replaceAll('{1}', getDayName(day))
         .replaceAll('{2}', startTime)
         .replaceAll('{3}', endTime);
   }

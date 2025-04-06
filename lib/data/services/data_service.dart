@@ -85,6 +85,7 @@ class DataService {
       return _trainers!;
     } catch (e) {
       stamp('DataService', 'Error loading trainers: $e');
+
       return [];
     }
   }
@@ -101,12 +102,11 @@ class DataService {
   // Get user activities synchronously - assumes data already loaded
   List<Activity> getUserActivitiesSync() {
     if (_activities == null) {
-      // Si no hay datos cargados aún, devolver lista vacía
-      stamp('DataService',
-          'Warning: Attempting to access user activities before data is loaded');
+      // If data is not loaded yet, return empty list
+      stamp('DataService', 'Warning: Attempting to access user activities before data is loaded');
       return [];
     }
-
+    
     return _activities!
         .where((activity) => activity.enrolledMembers.contains(_currentUserId))
         .toList();

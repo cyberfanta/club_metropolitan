@@ -23,10 +23,10 @@ class CustomSliverGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    // Calcular el ancho total disponible
+    // Calculate total available width
     final double availableWidth = constraints.crossAxisExtent;
 
-    // Calcular el ancho de cada elemento considerando el espaciado
+    // Calculate width of each item considering spacing
     final double usableWidth = availableWidth - spacing * (crossAxisCount - 1);
     final double cellWidth = usableWidth / crossAxisCount;
 
@@ -150,9 +150,9 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           SnackBar(
                             content: Text(
                               _uiTexts.enrollmentCancelled(activity.name),
-                              style: styleRegular(),
+                              style: styleRegular(color: cWhite),
                             ),
-                            backgroundColor: cGray,
+                            backgroundColor: cRedError,
                           ),
                         );
                         widget.onUserActivitiesChanged(
@@ -190,7 +190,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                                     result['oldActivity'],
                                     result['newActivity'],
                                   ),
-                                  style: styleRegular(),
+                                  style: styleRegular(color: cWhite),
                                 ),
                                 backgroundColor: cGreen,
                               ),
@@ -214,7 +214,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                           SnackBar(
                             content: Text(
                               _uiTexts.enrollmentSuccessful(activity.name),
-                              style: styleRegular(),
+                              style: styleRegular(color: cWhite),
                             ),
                             backgroundColor: cGreen,
                           ),
@@ -246,53 +246,44 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Obtener orientación actual
-        final orientation = MediaQuery
-            .of(context)
-            .orientation;
+        // Get current orientation
+        final orientation = MediaQuery.of(context).orientation;
         final isLandscape = orientation == Orientation.landscape;
-
-        // Mejorar detección de tipos de dispositivos considerando orientación
+        
+        // Improve device type detection considering orientation
         final bool isMobile = constraints.maxWidth < 600;
-        final bool isTablet =
-            constraints.maxWidth >= 600 && constraints.maxWidth < 960;
+        final bool isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 960;
         final bool isDesktop = constraints.maxWidth >= 960;
-
-        // Detectar específicamente móvil en horizontal
+        
+        // Detect specifically horizontal mobile
         final bool isMobileLandscape = isMobile && isLandscape;
-
-        // Usar grid view para tablet, desktop o móvil en horizontal
+        
+        // Use grid view for tablet, desktop or horizontal mobile
         final bool useGridView = !isMobile || isMobileLandscape;
 
-        // Fixed card sizes for width and height - ajustar para móvil horizontal
+        // Fixed card sizes for width and height - adjust for horizontal mobile
         final double cardWidth = isDesktop ? 400 : 350;
-        final double cardHeight =
-        isDesktop ? 400 : (isMobileLandscape ? 300 : 350);
-
-        // Calcular dinámicamente el número de columnas basado en el ancho disponible
+        final double cardHeight = isDesktop ? 400 : (isMobileLandscape ? 300 : 350);
+        
+        // Dynamically calculate number of columns based on available width
         int calculateColumnCount(double availableWidth) {
           if (isMobile && !isLandscape) return 1;
-
-          if (isMobile && isLandscape) {
-            return 2; // 2 columnas en móvil horizontal
-          }
-
+          if (isMobile && isLandscape) return 2; // 2 columns in horizontal mobile
           if (isTablet) return 2;
-
-          // Para desktop, calcular columnas basado en el ancho disponible
-          // Permitiendo hasta 6 columnas en pantallas muy anchas
+          
+          // For desktop, calculate columns based on available width
+          // Allowing up to 6 columns on very wide screens
           final int maxColumns = 6;
-          final double availableSpace =
-              availableWidth - 32; // 32 = padding total
-
-          // Considerando el espacio entre columnas (16px)
+          final double availableSpace = availableWidth - 32; // 32 = total padding
+          
+          // Considering space between columns (16px)
           int calculatedColumns = (availableSpace / (cardWidth + 16)).floor();
-
-          // Limitar entre 3 y maxColumns
+          
+          // Limit between 3 and maxColumns
           return calculatedColumns.clamp(3, maxColumns);
         }
-
-        // Calcular número de columnas para la vista actual
+        
+        // Calculate column count for current view
         final int columnCount = calculateColumnCount(constraints.maxWidth);
 
         return Scaffold(
@@ -352,7 +343,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             ),
                           ),
                         ),
-                        // Reducir espacio vertical en modo horizontal para móviles
+                        // Switch vertical spacing in horizontal mode for mobile
                         SizedBox(height: isMobileLandscape ? 16 : 24),
 
                         // Activities list - adaptable to grid or list based on width
@@ -414,10 +405,9 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
     final bool isEnrolled = _useCases.isUserEnrolled(activity);
 
     // For hasConflict, we'll just do a first check - the full detailed check happens when opening
-    // No debemos mostrar una viñeta "adjustable" solo porque hay espacios disponibles
-    // Solo mostrar la viñeta si hay un conflicto real con otra actividad del usuario
-    final bool hasConflict = !isEnrolled &&
-        _useCases.hasQuickTimeConflict(activity);
+    // We should not show an "adjustable" badge just because space is available
+    // Only show the badge if there's a real conflict with another user activity
+    final bool hasConflict = !isEnrolled && _useCases.hasQuickTimeConflict(activity);
     
     // Method to build each activity item (reusable for grid and list)
     return Padding(

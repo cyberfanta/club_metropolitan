@@ -26,11 +26,15 @@ class ActivityDetailModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener UiTexts del Provider correctamente
+    // Get UiTexts from Provider correctly
     final uiTexts = Provider.of<UiTexts>(context);
     final size = MediaQuery.of(context).size;
+    
+    // Detect orientation
+    final orientation = MediaQuery.of(context).orientation;
 
     // More granular responsive breakpoints
+    final bool isMobileLandscape = orientation == Orientation.landscape;
     final bool isMediumScreen = size.width >= 600 && size.width < 960;
     final bool isWideScreen = size.width >= 960;
 
@@ -47,17 +51,27 @@ class ActivityDetailModal extends StatelessWidget {
             : isMediumScreen
             ? 700
             : size.width;
+    
+    // Adjust maximum height in landscape mode for mobile devices
+    final double maxModalHeight = isMobileLandscape
+        ? size.height * 0.9  // 90% of height in landscape mode
+        : size.height * 0.85; // 85% in normal mode
 
     double lineSideMargin = (size.width - 30) / 2;
+    double buttonSideMargin = (size.width - (isMobileLandscape ? maxWidth * 0.9 : maxWidth * 0.8)) / 2;
 
     return Container(
       width: maxWidth,
+      constraints: BoxConstraints(
+        maxHeight: maxModalHeight,
+      ),
       decoration: BoxDecoration(
         color: cWhite,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Stack(
         children: [
+          // Drag handle at the top
           Positioned(
             top: 6,
             left: lineSideMargin,
@@ -65,225 +79,264 @@ class ActivityDetailModal extends StatelessWidget {
             child: Container(height: 3, color: adjustOpacity(cBlack, 0.3)),
           ),
 
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  24,
-                  horizontalPadding,
-                  0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        activity.name,
-                        style: styleBold(
-                          fontSize:
-                              isWideScreen
-                                  ? 24
-                                  : isMediumScreen
-                                  ? 22
-                                  : 20,
+          // Complete content with scroll
+          Container(
+            margin: EdgeInsets.only(bottom: isMobileLandscape ? 84 : 72),
+            child: ListView(
+              shrinkWrap: true,
+              physics: isMobileLandscape
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const ClampingScrollPhysics(),
+              children: [
+                // Header with close button
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    24,
+                    horizontalPadding,
+                    0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          activity.name,
+                          style: styleBold(
+                            fontSize:
+                                isWideScreen
+                                    ? 24
+                                    : isMediumScreen
+                                    ? 22
+                                    : 20,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => _useCases.closeModal(context),
-                      icon: const Icon(Icons.close, color: cBlack),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Activity image
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  16,
-                  horizontalPadding,
-                  16,
-                ),
-                child: ClipRect(
-                  child: Image.asset(
-                    activity.imagePath,
-                    height:
-                        isWideScreen
-                            ? 300
-                            : isMediumScreen
-                            ? 200
-                            : 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                      IconButton(
+                        onPressed: () => _useCases.closeModal(context),
+                        icon: const Icon(Icons.close, color: cBlack),
+                      ),
+                    ],
                   ),
                 ),
-              ),
 
-              // Activity details
-              Flexible(
-                child: SingleChildScrollView(
+                // Activity image - reduced size in landscape mode for mobile
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    16,
+                    horizontalPadding,
+                    16,
+                  ),
+                  child: ClipRect(
+                    child: Image.asset(
+                      activity.imagePath,
+                      height: isMobileLandscape
+                          ? 120  // Reduced height in mobile landscape
+                          : isWideScreen
+                              ? 300
+                              : isMediumScreen
+                              ? 200
+                              : 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+
+                // Activity details
+                Padding(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
                     0,
                     horizontalPadding,
-                    100,
+                    isMobileLandscape ? 16 : 0,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Time and day
-                      Row(
+                      // Time and day - responsive layout
+                      isMobileLandscape
+                          ? Wrap(
+                              spacing: 12,
+                              runSpacing: 8,
+                              children: [
+                                // Time
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: adjustOpacity(cBlack, 0.08),
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.access_time, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${activity.startTime} - ${activity.endTime}",
+                                        style: styleMedium(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Day
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: adjustOpacity(cBlack, 0.08),
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.calendar_today, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        uiTexts.getDayName(activity.day),
+                                        style: styleMedium(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: adjustOpacity(cBlack, 0.08),
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.access_time, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${activity.startTime} - ${activity.endTime}",
+                                        style: styleMedium(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: adjustOpacity(cBlack, 0.08),
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        uiTexts.getDayName(activity.day),
+                                        style: styleMedium(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                      // Location, Trainer, Capacity - Adapted for landscape mode
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: adjustOpacity(cBlack, 0.08),
-                              borderRadius: BorderRadius.zero,
-                            ),
+                          // Location
+                          Padding(
+                            padding: EdgeInsets.only(top: isMobileLandscape ? 8 : 16),
                             child: Row(
                               children: [
-                                const Icon(Icons.access_time, size: 16),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "${activity.startTime} - ${activity.endTime}",
-                                  style: styleMedium(fontSize: 14),
+                                const Icon(Icons.location_on, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    activity.location,
+                                    style: styleRegular(
+                                      fontSize: isWideScreen ? 18 : isMediumScreen ? 16 : 14,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: adjustOpacity(cBlack, 0.08),
-                              borderRadius: BorderRadius.zero,
-                            ),
+
+                          // Trainer
+                          Padding(
+                            padding: EdgeInsets.only(top: isMobileLandscape ? 4 : 8),
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today, size: 16),
-                                const SizedBox(width: 4),
+                                const Icon(Icons.person, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _useCases.getTrainerFullName(activity, uiTexts),
+                                    style: styleRegular(
+                                      fontSize: isWideScreen ? 18 : isMediumScreen ? 16 : 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Capacity
+                          Padding(
+                            padding: EdgeInsets.only(top: isMobileLandscape ? 4 : 8),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.people, size: 18),
+                                const SizedBox(width: 8),
                                 Text(
-                                  uiTexts.getDayName(activity.day),
-                                  style: styleMedium(fontSize: 14),
+                                  "${activity.enrolledMembers.length}/${activity.capacity} ${uiTexts.participants}",
+                                  style: styleRegular(
+                                    fontSize: isWideScreen ? 18 : isMediumScreen ? 16 : 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Description
+                          Padding(
+                            padding: EdgeInsets.only(top: isMobileLandscape ? 8 : 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  uiTexts.description,
+                                  style: styleBold(
+                                    fontSize: isWideScreen ? 20 : isMediumScreen ? 18 : 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  activity.description,
+                                  style: styleRegular(
+                                    fontSize: isWideScreen ? 16 : 14,
+                                    height: 1.5,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ],
-                      ),
-
-                      // Location
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                activity.location,
-                                style: styleRegular(
-                                  fontSize:
-                                      isWideScreen
-                                          ? 18
-                                          : isMediumScreen
-                                          ? 16
-                                          : 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Trainer
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.person, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _useCases.getTrainerFullName(activity, uiTexts),
-                                style: styleRegular(
-                                  fontSize:
-                                      isWideScreen
-                                          ? 18
-                                          : isMediumScreen
-                                          ? 16
-                                          : 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Capacity
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.people, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              "${activity.enrolledMembers.length}/${activity.capacity} ${uiTexts.participants}",
-                              style: styleRegular(
-                                fontSize:
-                                    isWideScreen
-                                        ? 18
-                                        : isMediumScreen
-                                        ? 16
-                                        : 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Description title
-                      Padding(
-                        padding: const EdgeInsets.only(top: 24),
-                        child: Text(
-                          uiTexts.description,
-                          style: styleBold(
-                            fontSize:
-                                isWideScreen
-                                    ? 20
-                                    : isMediumScreen
-                                    ? 18
-                                    : 16,
-                          ),
-                        ),
-                      ),
-
-                      // Description
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          activity.description,
-                          style: styleRegular(
-                            height: 1.5,
-                            fontSize:
-                                isWideScreen
-                                    ? 16
-                                    : isMediumScreen
-                                    ? 14
-                                    : 12,
-                          ),
-                        ),
                       ),
 
                       // Warning about conflicting activity
@@ -335,89 +388,63 @@ class ActivityDetailModal extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
-          // Action button at the bottom
+          // Action button - adjusted for landscape mode
           Positioned(
-            bottom: 8,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.all(
-                isWideScreen
-                    ? 32
-                    : isMediumScreen
-                    ? 24
-                    : 16,
-              ),
-              decoration: BoxDecoration(
-                color: cWhite,
-                boxShadow: [
-                  BoxShadow(
-                    color: adjustOpacity(cBlack, 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+              bottom: 24,
+            left: buttonSideMargin,
+            right: buttonSideMargin,
+            child: SizedBox(
+              width: isMobileLandscape ? maxWidth * 0.7 : maxWidth * 0.8,
+              child: ElevatedButton(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _useCases.getActionButtonColor(
+                    isUserEnrolled,
+                    conflictingActivity,
+                    adjustOpacity(cGreen, .7),
+                    cRedError,
+                    cOrange,
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment:
-                    isWideScreen
-                        ? MainAxisAlignment.center
-                        : isMediumScreen
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.center,
-                children: [
-                  // In web version, limit button width
-                  SizedBox(
-                    width:
-                        isWideScreen
-                            ? 300
-                            : isMediumScreen
-                            ? 200
-                            : size.width - 32,
-                    child: ElevatedButton(
-                      onPressed: onAction,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _useCases.getActionButtonColor(
-                          isUserEnrolled,
-                          conflictingActivity,
-                          cBlack,
-                          cRed,
-                          cOrange,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          vertical:
-                              isWideScreen
-                                  ? 16
-                                  : isMediumScreen
-                                  ? 12
-                                  : 12,
-                        ),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      child: Text(
-                        actionLabel,
-                        style: styleBold(
-                          color: cWhite,
-                          fontSize:
-                              isWideScreen
-                                  ? 18
-                                  : isMediumScreen
-                                  ? 16
-                                  : 14,
-                        ),
-                      ),
-                    ),
+                  foregroundColor: cWhite,
+                  padding: EdgeInsets.symmetric(
+                    vertical: isMobileLandscape ? 12 : 16,
                   ),
-                ],
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+                child: Text(
+                  actionLabel,
+                  style: styleSemiBold(color: cWhite),
+                ),
               ),
             ),
           ),
+          
+          // Scroll indicator for mobile in horizontal mode
+          if (isMobileLandscape)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      adjustOpacity(cBlack, 0),
+                      adjustOpacity(cBlack, 0.1),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

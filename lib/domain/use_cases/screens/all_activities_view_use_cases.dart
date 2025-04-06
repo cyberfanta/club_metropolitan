@@ -38,7 +38,7 @@ class AllActivitiesViewUseCases {
     } else {
       final lowercaseQuery = query.toLowerCase();
       return allActivities.where((activity) {
-        // Si tenemos uiTexts, usar el nombre traducido del día
+        // If we have uiTexts, use the translated day name
         final bool dayMatch =
             uiTexts != null
                 ? uiTexts
@@ -68,40 +68,38 @@ class AllActivitiesViewUseCases {
   }
 
   // Method to quickly check if an activity might have a time conflict
-  // This version is síncrono para usar en la construcción de la tarjeta
+  // This is a synchronous version for use in card construction
   bool hasQuickTimeConflict(Activity activity) {
-    // No puede haber conflicto si el usuario ya está inscrito
+    // No conflict possible if user is already enrolled
     if (isUserEnrolled(activity)) return false;
-
-    // No puede haber conflicto si no hay espacio disponible
+    
+    // No conflict possible if there's no available space
     if (activity.capacity <= activity.enrolledMembers.length) return false;
-
-    // Verificar si hay otras actividades del usuario en el mismo día y hora
+    
+    // Check if there are other user activities on the same day and time
     try {
-      // Verificar solo actividades del mismo día (chequeo rápido)
+      // Only check activities on the same day (quick check)
       final userActivities = _dataService.getUserActivitiesSync();
-
+      
       for (final userActivity in userActivities) {
         if (userActivity.day == activity.day) {
-          // Verificar si hay solapamiento de horarios
-          // Convertir horarios a minutos para comparar fácilmente
+          // Check for time overlap
+          // Convert times to minutes for easy comparison
           final actStartMinutes = _timeToMinutes(activity.startTime);
           final actEndMinutes = _timeToMinutes(activity.endTime);
           final userStartMinutes = _timeToMinutes(userActivity.startTime);
           final userEndMinutes = _timeToMinutes(userActivity.endTime);
-
-          // Hay conflicto si el inicio de una está entre el inicio y fin de la otra
-          if ((actStartMinutes >= userStartMinutes &&
-                  actStartMinutes < userEndMinutes) ||
-              (userStartMinutes >= actStartMinutes &&
-                  userStartMinutes < actEndMinutes)) {
+          
+          // There's a conflict if the start of one is between the start and end of the other
+          if ((actStartMinutes >= userStartMinutes && actStartMinutes < userEndMinutes) ||
+              (userStartMinutes >= actStartMinutes && userStartMinutes < actEndMinutes)) {
             return true;
           }
         }
       }
       return false;
     } catch (e) {
-      // Si hay error, asumir que no hay conflicto para no mostrar indicador incorrecto
+      // If there's an error, assume no conflict to avoid showing incorrect indicator
       stamp('AllActivitiesViewUseCases', 'Error checking quick conflict: $e');
       return false;
     }
@@ -130,14 +128,17 @@ class AllActivitiesViewUseCases {
   // Cancel enrollment
   Future<Map<String, dynamic>> cancelEnrollment(Activity activity) async {
     final success = await _dataService.cancelEnrollment(activity.id);
+
     if (success) {
       final userActivities = await _dataService.getUserActivities();
+
       return {
         'success': true,
         'userActivities': userActivities,
         'message': 'enrollmentCancelled',
       };
     }
+
     return {'success': false};
   }
 
@@ -154,6 +155,7 @@ class AllActivitiesViewUseCases {
 
     if (success) {
       final userActivities = await _dataService.getUserActivities();
+
       return {
         'success': true,
         'userActivities': userActivities,
@@ -162,20 +164,24 @@ class AllActivitiesViewUseCases {
         'newActivity': activity.name,
       };
     }
+
     return {'success': false};
   }
 
   // Enroll in activity
   Future<Map<String, dynamic>> enrollInActivity(Activity activity) async {
     final success = await _dataService.enrollInActivity(activity.id);
+
     if (success) {
       final userActivities = await _dataService.getUserActivities();
+
       return {
         'success': true,
         'userActivities': userActivities,
         'message': 'enrollmentSuccessful',
       };
     }
+
     return {'success': false};
   }
 
@@ -233,10 +239,12 @@ class AllActivitiesViewUseCases {
   ) {
     if (isUserEnrolled) {
       return uiTexts.cancelEnrollment;
-    } else if (hasConflict && conflictingActivity != null) {
-      return uiTexts.changeActivityFor(conflictingActivity.name);
-    } else {
-      return uiTexts.enroll;
     }
+
+    if (hasConflict && conflictingActivity != null) {
+      return uiTexts.changeActivityFor(conflictingActivity.name);
+    }
+
+    return uiTexts.enroll;
   }
 }

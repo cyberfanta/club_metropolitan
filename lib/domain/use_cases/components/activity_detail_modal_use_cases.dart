@@ -26,10 +26,12 @@ class ActivityDetailModalUseCases {
   ) {
     if (isUserEnrolled) {
       return cancelColor; // Red for cancellation
-    } else if (conflictingActivity != null) {
-      return warningColor; // Orange for conflicting activities
-    } else {
-      return defaultColor; // Default color (usually black)
     }
+
+    if (conflictingActivity != null) {
+      return warningColor; // Orange for conflicting activities
+    }
+
+    return defaultColor; // Default color (usually black)
   }
 }

@@ -32,12 +32,14 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     _uiTexts = Provider.of<UiTexts>(context);
   }
 
   @override
   void initState() {
     super.initState();
+
     _loadUserActivities();
   }
 
@@ -48,6 +50,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
 
     try {
       final activities = await _dataService.getUserActivities();
+
       setState(() {
         _userActivities = activities;
         _isLoading = false;
@@ -199,6 +202,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     itemCount: _userActivities.length,
                     itemBuilder: (context, index) {
                       final activity = _userActivities[index];
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: ActivityCard(
