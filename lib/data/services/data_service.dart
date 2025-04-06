@@ -98,6 +98,20 @@ class DataService {
         .toList();
   }
 
+  // Get user activities synchronously - assumes data already loaded
+  List<Activity> getUserActivitiesSync() {
+    if (_activities == null) {
+      // Si no hay datos cargados aún, devolver lista vacía
+      stamp('DataService',
+          'Warning: Attempting to access user activities before data is loaded');
+      return [];
+    }
+
+    return _activities!
+        .where((activity) => activity.enrolledMembers.contains(_currentUserId))
+        .toList();
+  }
+
   // Enroll current user in an activity
   Future<bool> enrollInActivity(int activityId) async {
     final activities = await getActivities();

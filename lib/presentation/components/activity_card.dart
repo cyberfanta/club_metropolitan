@@ -12,6 +12,8 @@ class ActivityCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDesktop;
   final bool isTablet;
+  final bool? isUserEnrolled;
+  final bool? hasConflict;
   final ActivityCardUseCases _useCases = ActivityCardUseCases();
 
   ActivityCard({
@@ -20,10 +22,13 @@ class ActivityCard extends StatelessWidget {
     required this.onTap,
     this.isDesktop = false,
     this.isTablet = false,
+    this.isUserEnrolled,
+    this.hasConflict,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Obtener UiTexts del Provider correctamente
     final uiTexts = Provider.of<UiTexts>(context);
 
     // Fixed dimensions to prevent layout breaks
@@ -55,16 +60,51 @@ class ActivityCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Image with fixed height
-            Container(
-              height: imageHeight,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.zero,
-                image: DecorationImage(
-                  image: AssetImage(activity.imagePath),
-                  fit: BoxFit.cover,
+            Stack(
+              children: [
+                Container(
+                  height: imageHeight,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.zero,
+                    image: DecorationImage(
+                      image: AssetImage(activity.imagePath),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
+                // Status indicator
+                if (isUserEnrolled == true || hasConflict == true)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isUserEnrolled == true
+                            ? cGreen
+                            : hasConflict == true
+                            ? cOrange
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      child: Text(
+                        isUserEnrolled == true
+                            ? uiTexts.enrolled
+                            : hasConflict == true
+                            ? uiTexts.adjustable
+                            : "",
+                        style: styleBold(
+                          fontSize: textSize,
+                          color: cWhite,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             // Content with consistent padding
             Padding(

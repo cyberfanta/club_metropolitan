@@ -111,7 +111,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
 
   void _applyFilter() {
     setState(() {
-      _filteredActivities = _useCases.applyFilter(_allActivities, _searchQuery);
+      _filteredActivities =
+          _useCases.applyFilter(_allActivities, _searchQuery, _uiTexts);
     });
   }
 
@@ -239,24 +240,43 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery
+        .of(context)
+        .size;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Simplify responsive breakpoints with consistent naming
+        // Obtener orientación actual
+        final orientation = MediaQuery
+            .of(context)
+            .orientation;
+        final isLandscape = orientation == Orientation.landscape;
+
+        // Mejorar detección de tipos de dispositivos considerando orientación
         final bool isMobile = constraints.maxWidth < 600;
         final bool isTablet =
             constraints.maxWidth >= 600 && constraints.maxWidth < 960;
         final bool isDesktop = constraints.maxWidth >= 960;
 
-        // Always use a list for mobile, grid for tablet and desktop
-        final bool useGridView = !isMobile;
+        // Detectar específicamente móvil en horizontal
+        final bool isMobileLandscape = isMobile && isLandscape;
 
-        // Fixed card sizes for width and height
+        // Usar grid view para tablet, desktop o móvil en horizontal
+        final bool useGridView = !isMobile || isMobileLandscape;
+
+        // Fixed card sizes for width and height - ajustar para móvil horizontal
         final double cardWidth = isDesktop ? 400 : 350;
-        final double cardHeight = isDesktop ? 400 : 350;
+        final double cardHeight =
+        isDesktop ? 400 : (isMobileLandscape ? 300 : 350);
 
         // Calcular dinámicamente el número de columnas basado en el ancho disponible
         int calculateColumnCount(double availableWidth) {
-          if (isMobile) return 1;
+          if (isMobile && !isLandscape) return 1;
+
+          if (isMobile && isLandscape) {
+            return 2; // 2 columnas en móvil horizontal
+          }
+
           if (isTablet) return 2;
 
           // Para desktop, calcular columnas basado en el ancho disponible
@@ -296,7 +316,12 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                       children: [
                         // Search and filters - adaptive to available width
                         Container(
-                          width: isDesktop ? 400 : double.infinity,
+                          width:
+                          isDesktop
+                              ? 400
+                              : isMobileLandscape
+                              ? constraints.maxWidth * 0.6
+                              : size.width,
                           decoration: BoxDecoration(
                             color: cWhite,
                             borderRadius: BorderRadius.zero,
@@ -327,7 +352,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        // Reducir espacio vertical en modo horizontal para móviles
+                        SizedBox(height: isMobileLandscape ? 16 : 24),
 
                         // Activities list - adaptable to grid or list based on width
                         Expanded(
@@ -384,6 +410,15 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
     required bool isDesktop,
     required bool useGridView,
   }) {
+    // Check if user is enrolled in this activity
+    final bool isEnrolled = _useCases.isUserEnrolled(activity);
+
+    // For hasConflict, we'll just do a first check - the full detailed check happens when opening
+    // No debemos mostrar una viñeta "adjustable" solo porque hay espacios disponibles
+    // Solo mostrar la viñeta si hay un conflicto real con otra actividad del usuario
+    final bool hasConflict = !isEnrolled &&
+        _useCases.hasQuickTimeConflict(activity);
+    
     // Method to build each activity item (reusable for grid and list)
     return Padding(
       padding: EdgeInsets.only(bottom: useGridView ? 0 : 16),
@@ -392,6 +427,8 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
         onTap: () => _showActivityDetail(activity),
         isDesktop: isDesktop,
         isTablet: !isDesktop && useGridView,
+        isUserEnrolled: isEnrolled,
+        hasConflict: hasConflict,
       ),
     );
   }
