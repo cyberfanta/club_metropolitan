@@ -199,9 +199,12 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     itemCount: _userActivities.length,
                     itemBuilder: (context, index) {
                       final activity = _userActivities[index];
-                      return ActivityCard(
-                        activity: activity,
-                        onTap: () => _showActivityDetail(activity),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: ActivityCard(
+                          activity: activity,
+                          onTap: () => _showActivityDetail(activity),
+                        ),
                       );
                     },
                   ),

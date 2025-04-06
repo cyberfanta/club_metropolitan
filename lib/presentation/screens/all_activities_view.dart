@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/lang/ui_texts.dart';
@@ -8,6 +9,44 @@ import '../../domain/models/activity.dart';
 import '../../domain/use_cases/screens/all_activities_view_use_cases.dart';
 import '../components/activity_card.dart';
 import '../components/activity_detail_modal.dart';
+
+class CustomSliverGridDelegate extends SliverGridDelegate {
+  final int crossAxisCount;
+  final double spacing;
+  final double childHeight;
+
+  const CustomSliverGridDelegate({
+    required this.crossAxisCount,
+    required this.spacing,
+    required this.childHeight,
+  });
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    // Calcular el ancho total disponible
+    final double availableWidth = constraints.crossAxisExtent;
+
+    // Calcular el ancho de cada elemento considerando el espaciado
+    final double usableWidth = availableWidth - spacing * (crossAxisCount - 1);
+    final double cellWidth = usableWidth / crossAxisCount;
+
+    return SliverGridRegularTileLayout(
+      crossAxisCount: crossAxisCount,
+      mainAxisStride: childHeight + spacing,
+      crossAxisStride: cellWidth + spacing,
+      childMainAxisExtent: childHeight,
+      childCrossAxisExtent: cellWidth,
+      reverseCrossAxis: false,
+    );
+  }
+
+  @override
+  bool shouldRelayout(CustomSliverGridDelegate oldDelegate) {
+    return oldDelegate.crossAxisCount != crossAxisCount ||
+        oldDelegate.spacing != spacing ||
+        oldDelegate.childHeight != childHeight;
+  }
+}
 
 class AllActivitiesView extends StatefulWidget {
   final Function(List<Activity>) onUserActivitiesChanged;
@@ -20,7 +59,7 @@ class AllActivitiesView extends StatefulWidget {
 
 class _AllActivitiesViewState extends State<AllActivitiesView> {
   final AllActivitiesViewUseCases _useCases = AllActivitiesViewUseCases();
-  
+
   List<Activity> _allActivities = [];
   bool _isLoading = true;
 
@@ -200,164 +239,160 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: cLightGray,
-      appBar: AppBar(
-        backgroundColor: cWhite,
-        elevation: 0,
-        title: Text(_uiTexts.allActivities, style: styleBold(fontSize: 20)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: cBlack),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                children: [
-                  // Search and filters
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: cWhite,
-                        border: Border.all(color: cGray),
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: Icon(Icons.search, color: adjustOpacity(cBlack, 0.6)),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              decoration: InputDecoration(
-                                hintText: _uiTexts.searchActivities,
-                                hintStyle: styleRegular(color: adjustOpacity(cBlack, 0.6)),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                              ),
-                              style: styleRegular(color: cBlack),
-                              onChanged: (value) {
-                                setState(() {
-                                  _searchQuery = value;
-                                  _applyFilter();
-                                });
-                              },
-                            ),
-                          ),
-                          if (_searchQuery.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: GestureDetector(
-                                onTap: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _searchQuery = '';
-                                    _applyFilter();
-                                  });
-                                },
-                                child: Icon(Icons.clear, color: adjustOpacity(cBlack, 0.6)),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Simplify responsive breakpoints with consistent naming
+        final bool isMobile = constraints.maxWidth < 600;
+        final bool isTablet =
+            constraints.maxWidth >= 600 && constraints.maxWidth < 960;
+        final bool isDesktop = constraints.maxWidth >= 960;
 
-                  // Activities list
-                  Expanded(
-                    child:
-                        _filteredActivities.isEmpty
-                            ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 60,
-                                    color: adjustOpacity(cBlack, 0.3),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    _uiTexts.noActivitiesFound,
-                                    style: styleRegular(
-                                      color: adjustOpacity(cBlack, 0.7),
+        // Always use a list for mobile, grid for tablet and desktop
+        final bool useGridView = !isMobile;
+
+        // Fixed card sizes for width and height
+        final double cardWidth = isDesktop ? 400 : 350;
+        final double cardHeight = isDesktop ? 400 : 350;
+
+        // Calcular dinámicamente el número de columnas basado en el ancho disponible
+        int calculateColumnCount(double availableWidth) {
+          if (isMobile) return 1;
+          if (isTablet) return 2;
+
+          // Para desktop, calcular columnas basado en el ancho disponible
+          // Permitiendo hasta 6 columnas en pantallas muy anchas
+          final int maxColumns = 6;
+          final double availableSpace =
+              availableWidth - 32; // 32 = padding total
+
+          // Considerando el espacio entre columnas (16px)
+          int calculatedColumns = (availableSpace / (cardWidth + 16)).floor();
+
+          // Limitar entre 3 y maxColumns
+          return calculatedColumns.clamp(3, maxColumns);
+        }
+
+        // Calcular número de columnas para la vista actual
+        final int columnCount = calculateColumnCount(constraints.maxWidth);
+
+        return Scaffold(
+          backgroundColor: cLightGray,
+          appBar: AppBar(
+            backgroundColor: cWhite,
+            elevation: 0,
+            title: Text(_uiTexts.allActivities, style: styleBold(fontSize: 20)),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: cBlack),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body:
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Search and filters - adaptive to available width
+                        Container(
+                          width: isDesktop ? 400 : double.infinity,
+                          decoration: BoxDecoration(
+                            color: cWhite,
+                            borderRadius: BorderRadius.zero,
+                            boxShadow: [
+                              BoxShadow(
+                                color: adjustOpacity(cBlack, 0.1),
+                                offset: const Offset(0, 4),
+                                blurRadius: 12,
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (query) {
+                              setState(() {
+                                _searchQuery = query;
+                                _applyFilter();
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: _uiTexts.searchActivities,
+                              prefixIcon: const Icon(Icons.search),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Activities list - adaptable to grid or list based on width
+                        Expanded(
+                          child:
+                              _filteredActivities.isEmpty
+                                  ? Center(
+                                    child: Text(
+                                      _uiTexts.noActivitiesFound,
+                                      style: styleMedium(fontSize: 16),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            )
-                            : RefreshIndicator(
-                              onRefresh: _loadActivities,
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount: _filteredActivities.length,
-                                itemBuilder: (context, index) {
-                                  final activity = _filteredActivities[index];
-                                  final bool isEnrolled = _useCases
-                                      .isUserEnrolled(activity);
-
-                                  return FutureBuilder<bool>(
-                                    future: _useCases.hasTimeConflict(activity),
-                                    builder: (context, snapshot) {
-                                      final bool hasConflict =
-                                          snapshot.data ?? false;
-
-                                      return Stack(
-                                        children: [
-                                          ActivityCard(
-                                            activity: activity,
-                                            onTap:
-                                                () => _showActivityDetail(
-                                                  activity,
-                                                ),
-                                          ),
-                                          if (isEnrolled || hasConflict)
-                                            Positioned(
-                                              top: 8,
-                                              right: 8,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      isEnrolled
-                                                          ? cGreen
-                                                          : cOrange,
-                                                  borderRadius:
-                                                      BorderRadius.zero,
-                                                ),
-                                                child: Text(
-                                                  isEnrolled
-                                                      ? _uiTexts.enrolled
-                                                      : _uiTexts.adjustable,
-                                                  style: styleBold(
-                                                    fontSize: 12,
-                                                    color: cWhite,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
+                                  )
+                                  : useGridView
+                                  // Grid view for tablet and desktop screens
+                                  ? GridView.builder(
+                                    gridDelegate: CustomSliverGridDelegate(
+                                      crossAxisCount: columnCount,
+                                      spacing: 16,
+                                      childHeight: cardHeight,
+                                    ),
+                                    itemCount: _filteredActivities.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildActivityItem(
+                                        context,
+                                        _filteredActivities[index],
+                                        isDesktop: isDesktop,
+                                        useGridView: useGridView,
                                       );
                                     },
-                                  );
-                                },
-                              ),
-                            ),
+                                  )
+                                  // List view for mobile screens
+                                  : ListView.builder(
+                                    itemCount: _filteredActivities.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildActivityItem(
+                                        context,
+                                        _filteredActivities[index],
+                                        isDesktop: isDesktop,
+                                        useGridView: useGridView,
+                                      );
+                                    },
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+        );
+      },
+    );
+  }
+
+  Widget _buildActivityItem(
+    BuildContext context,
+    Activity activity, {
+    required bool isDesktop,
+    required bool useGridView,
+  }) {
+    // Method to build each activity item (reusable for grid and list)
+    return Padding(
+      padding: EdgeInsets.only(bottom: useGridView ? 0 : 16),
+      child: ActivityCard(
+        activity: activity,
+        onTap: () => _showActivityDetail(activity),
+        isDesktop: isDesktop,
+        isTablet: !isDesktop && useGridView,
+      ),
     );
   }
 }

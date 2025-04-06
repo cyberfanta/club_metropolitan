@@ -55,26 +55,26 @@ class Activity {
       startTime = timeParts.isNotEmpty ? timeParts[0] : '00:00';
       endTime = timeParts.length > 1 ? timeParts[1] : '00:00';
     } else if (timeString.isNotEmpty) {
-      // Si solo hay un tiempo, asumimos que es el inicio y le damos un final por defecto
+      // If there is only one time, assume it's the start and provide a default end time
       startTime = timeString.trim();
       
-      // Intentar calcular una hora de finalización sumando 1 hora al inicio
+      // Try to calculate an end time by adding 1 hour to the start time
       try {
         if (startTime.contains(':')) {
           List<String> hourMin = startTime.split(':');
           int hour = int.parse(hourMin[0]);
           int min = hourMin.length > 1 ? int.parse(hourMin[1]) : 0;
           
-          hour = (hour + 1) % 24; // Sumar 1 hora, ciclo de 24h
+          hour = (hour + 1) % 24; // Add 1 hour, 24-hour cycle
           endTime = '$hour:${min.toString().padLeft(2, '0')}';
         } else {
-          endTime = startTime; // Si no podemos parsear, usamos el mismo valor
+          endTime = startTime; // If we can't parse, use the same value
         }
       } catch (e) {
-        endTime = '${startTime}+1h'; // Fallback
+        endTime = '$startTime+1h'; // Fallback
       }
     } else {
-      // Si no hay datos de tiempo, establecemos valores por defecto
+      // If there is no time data, set default values
       startTime = '00:00';
       endTime = '00:00';
     }

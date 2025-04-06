@@ -132,7 +132,7 @@ class UiTextEs {
     return "Has cambiado {0} por {1}";
   }
 
-  // Días de la semana
+  // Days of the week
   String getDayName(String dayKey) {
     switch (dayKey.toLowerCase()) {
       case 'lunes':

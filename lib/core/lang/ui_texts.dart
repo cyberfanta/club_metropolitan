@@ -238,7 +238,7 @@ class UiTexts extends ChangeNotifier {
     return template.replaceAll('{0}', activityName);
   }
 
-  // Días de la semana
+  // Days of the week
   String getDayName(String day) {
     if (_locale.languageCode == 'es') {
       return UiTextEs().getDayName(day);
