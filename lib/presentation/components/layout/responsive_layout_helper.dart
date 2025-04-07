@@ -34,17 +34,14 @@ class ResponsiveLayoutHelper {
 
   /// Calculate the appropriate number of columns for the grid
   int calculateColumnCount() {
-    if (isMobile && !isLandscape) {
-      return 1;
-    }
+    // For portrait mobile - single column
+    if (isMobile && !isLandscape) return 1;
 
-    if (isMobile && isLandscape) {
-      return 2; // 2 columns in horizontal mobile
-    }
+    // For landscape mobile - two columns
+    if (isMobile && isLandscape) return 2;
 
-    if (isTablet) {
-      return 2;
-    }
+    // For tablets - two columns
+    if (isTablet) return 2;
 
     // For desktop, calculate columns based on available width
     // Allowing up to 6 columns on very wide screens

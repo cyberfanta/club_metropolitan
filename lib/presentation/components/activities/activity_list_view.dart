@@ -91,13 +91,18 @@ class ActivityListView extends StatelessWidget {
     // The full analysis happens when opening the activity details
     bool hasConflict = false;
 
+    // Only check for conflicts if not already enrolled
     if (!isEnrolled) {
       for (final userActivity in cubit.state.userActivities) {
-        if (userActivity.day == activity.day &&
-            cubit.timesOverlap(userActivity, activity)) {
-          hasConflict = true;
-          break;
+        // Skip if not on the same day or no time overlap
+        if (userActivity.day != activity.day ||
+            !cubit.timesOverlap(userActivity, activity)) {
+          continue;
         }
+
+        hasConflict = true;
+
+        break;
       }
     }
 

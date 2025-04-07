@@ -29,7 +29,11 @@ void stamp(
       decoratorCharEnd,
       extraLine,
     );
-  } else if (kDebugMode && !useLog) {
+
+    return;
+  }
+
+  if (kDebugMode) {
     _usePrintFunction(
       decoratorChar,
       tag,
@@ -38,6 +42,8 @@ void stamp(
       decoratorCharEnd,
       extraLine,
     );
+
+    return;
   }
 }
 

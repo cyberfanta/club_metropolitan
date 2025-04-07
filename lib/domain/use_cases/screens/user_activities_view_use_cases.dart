@@ -45,7 +45,7 @@ class UserActivitiesViewUseCases {
     Activity activity,
     UiTexts uiTexts,
   ) {
-    stamp('UserActivitiesView', 'Showing activity detail: ${activity.name}');
+    stamp('showActivityDetail', 'Showing activity detail: ${activity.name}');
 
     showModalBottomSheet(
       context: context,
@@ -65,25 +65,27 @@ class UserActivitiesViewUseCases {
                 uiTexts,
               );
 
-              if (confirmed && context.mounted) {
-                // Cancel enrollment using the Cubit
-                // ignore: use_build_context_synchronously
-                await context.read<UserActivitiesCubit>().cancelActivity(
-                  activity,
-                );
-
-                // Display feedback to the user about cancellation
-                // ignore: use_build_context_synchronously
-                showCancellationFeedback(
-                  // ignore: use_build_context_synchronously
-                  context,
-                  activity,
-                  uiTexts,
-                );
-
-                // ignore: use_build_context_synchronously
-                Navigator.pop(context);
+              if (!confirmed || !context.mounted) {
+                return;
               }
+
+              // Cancel enrollment using the Cubit
+              // ignore: use_build_context_synchronously
+              await context.read<UserActivitiesCubit>().cancelActivity(
+                activity,
+              );
+
+              // Display feedback to the user about cancellation
+              // ignore: use_build_context_synchronously
+              showCancellationFeedback(
+                // ignore: use_build_context_synchronously
+                context,
+                activity,
+                uiTexts,
+              );
+
+              // ignore: use_build_context_synchronously
+              Navigator.pop(context);
             },
             actionLabel: uiTexts.cancelEnrollment,
           ),
@@ -97,7 +99,7 @@ class UserActivitiesViewUseCases {
     UiTexts uiTexts,
   ) async {
     stamp(
-      'UserActivitiesView',
+      'showCancelConfirmationDialog',
       'Showing cancel confirmation for: ${activity.name}',
     );
 
@@ -124,7 +126,7 @@ class UserActivitiesViewUseCases {
     BuildContext context,
     Function() onRefreshUserData,
   ) {
-    stamp('UserActivitiesView', 'Navigating to All Activities');
+    stamp('navigateToAllActivities', 'Navigating to All Activities');
 
     Navigator.push(
       context,

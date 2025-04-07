@@ -83,6 +83,7 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
     }
 
     final normalizedQuery = query.toLowerCase();
+
     final filtered =
         state.allActivities.where((activity) {
           // Filter by activity name
@@ -128,12 +129,8 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
 
     // Log for debugging
     stamp(
-      "AllActivitiesCubit",
+      "isUserEnrolled",
       "Checking if user $currentUserId is enrolled in ${activity.name}",
-    );
-    stamp(
-      "AllActivitiesCubit",
-      "Enrolled members: ${activity.enrolledMembers}",
     );
 
     return activity.enrolledMembers.contains(currentUserId);
@@ -149,7 +146,7 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
 
     // Log for debugging
     stamp(
-      "AllActivitiesCubit",
+      "timesOverlap",
       "Checking time overlap between ${activity1.name} (${activity1.startTime}-${activity1.endTime}) and ${activity2.name} (${activity2.startTime}-${activity2.endTime})",
     );
 
@@ -163,11 +160,11 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
   Future<Activity?> getConflictingActivity(Activity activity) async {
     try {
       for (final userActivity in state.userActivities) {
-        if (userActivity.id != activity.id &&
-            userActivity.day == activity.day &&
-            timesOverlap(userActivity, activity)) {
-          return userActivity;
-        }
+        if (userActivity.id == activity.id) continue;
+        if (userActivity.day != activity.day) continue;
+        if (!timesOverlap(userActivity, activity)) continue;
+
+        return userActivity;
       }
 
       return null;
@@ -204,6 +201,7 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
           isLoading: false,
         ),
       );
+
       return state.userActivities;
     }
   }
@@ -275,7 +273,8 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
     final parts = time.split(':');
 
     if (parts.length != 2) {
-      stamp("AllActivitiesCubit", "Invalid time format: $time");
+      stamp("timeToMinutes", "Invalid time format: $time");
+
       return 0;
     }
 
@@ -285,7 +284,8 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
 
       return hours * 60 + minutes;
     } catch (e) {
-      stamp("AllActivitiesCubit", "Error parsing time: $time - $e");
+      stamp("timeToMinutes", "Error parsing time: $time - $e");
+
       return 0;
     }
   }

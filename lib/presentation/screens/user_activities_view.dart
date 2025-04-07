@@ -91,54 +91,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
             }
 
             if (state.userActivities.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 80,
-                      color: adjustOpacity(cBlack, 0.3),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _uiTexts.noActivitiesEnrolled,
-                      style: styleRegular(
-                        fontSize: 18,
-                        color: adjustOpacity(cBlack, 0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed:
-                          () => _useCases.navigateToAllActivities(
-                            context,
-                            () =>
-                                context
-                                    .read<UserActivitiesCubit>()
-                                    .refreshUserData(),
-                          ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: cBlack,
-                        foregroundColor: cWhite,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: Text(
-                          _uiTexts.exploreActivities,
-                          style: styleMedium(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return _buildEmptyState();
             }
 
             return RefreshIndicator(
@@ -167,6 +120,46 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 80,
+            color: adjustOpacity(cBlack, 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _uiTexts.noActivitiesEnrolled,
+            style: styleRegular(
+              fontSize: 18,
+              color: adjustOpacity(cBlack, 0.7),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed:
+                () => _useCases.navigateToAllActivities(
+                  context,
+                  () => context.read<UserActivitiesCubit>().refreshUserData(),
+                ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: cBlack,
+              foregroundColor: cWhite,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(_uiTexts.exploreActivities, style: styleMedium()),
+            ),
+          ),
+        ],
       ),
     );
   }

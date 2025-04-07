@@ -23,10 +23,14 @@ class AllActivitiesViewUseCases {
   // This is a synchronous version for use in card construction
   bool hasQuickTimeConflict(Activity activity) {
     // No conflict possible if user is already enrolled
-    if (isUserEnrolled(activity)) return false;
+    if (isUserEnrolled(activity)) {
+      return false;
+    }
 
     // No conflict possible if there's no available space
-    if (activity.capacity <= activity.enrolledMembers.length) return false;
+    if (activity.capacity <= activity.enrolledMembers.length) {
+      return false;
+    }
 
     // Check if there are other user activities on the same day and time
     try {
@@ -34,29 +38,34 @@ class AllActivitiesViewUseCases {
       final userActivities = _dataService.getUserActivitiesSync();
 
       for (final userActivity in userActivities) {
-        if (userActivity.day == activity.day) {
-          // Check for time overlap
-          // Convert times to minutes for easy comparison
-          final actStartMinutes = _timeToMinutes(activity.startTime);
-          final actEndMinutes = _timeToMinutes(activity.endTime);
-          final userStartMinutes = _timeToMinutes(userActivity.startTime);
-          final userEndMinutes = _timeToMinutes(userActivity.endTime);
+        // Skip if not on the same day
+        if (userActivity.day != activity.day) {
+          continue;
+        }
 
-          // There's a conflict if the start of one is between the start and end of the other
-          if ((actStartMinutes >= userStartMinutes &&
-                  actStartMinutes < userEndMinutes) ||
-              (userStartMinutes >= actStartMinutes &&
-                  userStartMinutes < actEndMinutes)) {
-            return true;
-          }
+        // Check for time overlap
+        // Convert times to minutes for easy comparison
+        final actStartMinutes = _timeToMinutes(activity.startTime);
+        final actEndMinutes = _timeToMinutes(activity.endTime);
+        final userStartMinutes = _timeToMinutes(userActivity.startTime);
+        final userEndMinutes = _timeToMinutes(userActivity.endTime);
+
+        // There's a conflict if the start of one is between the start and end of the other
+        bool hasOverlap =
+            (actStartMinutes >= userStartMinutes &&
+                actStartMinutes < userEndMinutes) ||
+            (userStartMinutes >= actStartMinutes &&
+                userStartMinutes < actEndMinutes);
+
+        if (hasOverlap) {
+          return true;
         }
       }
 
       return false;
     } catch (e) {
       // If there's an error, assume no conflict to avoid showing incorrect indicator
-      stamp('AllActivitiesViewUseCases', 'Error checking quick conflict: $e');
-
+      stamp('hasQuickTimeConflict', 'Error checking quick conflict: $e');
       return false;
     }
   }
@@ -86,7 +95,7 @@ class AllActivitiesViewUseCases {
     Activity conflictingActivity,
   ) async {
     stamp(
-      'AllActivitiesViewUseCases',
+      'showChangeActivityDialog',
       'Showing change activity dialog for ${newActivity.name}',
     );
 
@@ -136,30 +145,30 @@ class AllActivitiesViewUseCases {
     UiTexts uiTexts,
     Function(List<Activity>) onUserActivitiesChanged,
   ) {
-    stamp(
-      'AllActivitiesViewUseCases',
-      'Showing activity detail: ${activity.name}',
-    );
+    stamp('showActivityDetail', 'Showing activity detail: ${activity.name}');
 
     final cubit = context.read<AllActivitiesCubit>();
     final bool isEnrolled = cubit.isUserEnrolled(activity);
-    
+
     // Check if activity conflicts with another user activity
     Activity? conflictingActivity;
     bool hasConflict = false;
-    
+
     if (!isEnrolled) {
       // Check for conflicts only if not already enrolled
       for (final userActivity in cubit.state.userActivities) {
-        if (userActivity.day == activity.day && 
-            cubit.timesOverlap(userActivity, activity)) {
-          hasConflict = true;
-          conflictingActivity = userActivity;
-          break;
+        if (userActivity.day != activity.day ||
+            !cubit.timesOverlap(userActivity, activity)) {
+          continue;
         }
+
+        hasConflict = true;
+        conflictingActivity = userActivity;
+
+        break;
       }
     }
-    
+
     final actionLabel = getActionLabel(
       uiTexts,
       isEnrolled,
@@ -173,18 +182,20 @@ class AllActivitiesViewUseCases {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: cTransparent,
-      builder: (context) => ActivityDetailModal(
-        activity: activity,
-        isUserEnrolled: isEnrolled,
-        conflictingActivity: conflictingActivity,
-        onAction: () => handleEnrollment(
-          context,
-          activity,
-          uiTexts,
-          onUserActivitiesChanged,
-        ),
-        actionLabel: actionLabel,
-      ),
+      builder:
+          (context) => ActivityDetailModal(
+            activity: activity,
+            isUserEnrolled: isEnrolled,
+            conflictingActivity: conflictingActivity,
+            onAction:
+                () => handleEnrollment(
+                  context,
+                  activity,
+                  uiTexts,
+                  onUserActivitiesChanged,
+                ),
+            actionLabel: actionLabel,
+          ),
     );
   }
 
@@ -195,10 +206,7 @@ class AllActivitiesViewUseCases {
     UiTexts uiTexts,
     Function(List<Activity>) onUserActivitiesChanged,
   ) async {
-    stamp(
-      'AllActivitiesViewUseCases',
-      'Handling enrollment for: ${activity.name}',
-    );
+    stamp('handleEnrollment', 'Handling enrollment for: ${activity.name}');
 
     final cubit = context.read<AllActivitiesCubit>();
     final bool isEnrolled = cubit.isUserEnrolled(activity);
@@ -215,7 +223,11 @@ class AllActivitiesViewUseCases {
         uiTexts,
         onUserActivitiesChanged,
       );
-    } else if (hasConflict) {
+
+      return;
+    }
+
+    if (hasConflict) {
       await handleActivityConflict(
         // ignore: use_build_context_synchronously
         context,
@@ -224,15 +236,17 @@ class AllActivitiesViewUseCases {
         uiTexts,
         onUserActivitiesChanged,
       );
-    } else {
-      await handleDirectEnrollment(
-        // ignore: use_build_context_synchronously
-        context,
-        activity,
-        uiTexts,
-        onUserActivitiesChanged,
-      );
+
+      return;
     }
+
+    await handleDirectEnrollment(
+      // ignore: use_build_context_synchronously
+      context,
+      activity,
+      uiTexts,
+      onUserActivitiesChanged,
+    );
   }
 
   /// Handles cancellation of activity enrollment
@@ -243,7 +257,7 @@ class AllActivitiesViewUseCases {
     Function(List<Activity>) onUserActivitiesChanged,
   ) async {
     stamp(
-      'AllActivitiesViewUseCases',
+      'handleCancelEnrollment',
       'Handling cancel enrollment for: ${activity.name}',
     );
 
@@ -256,26 +270,28 @@ class AllActivitiesViewUseCases {
       uiTexts,
     );
 
-    if (confirmed && context.mounted) {
-      // Cancel enrollment
-      final updatedActivities = await cubit.cancelEnrollment(activity);
-
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            uiTexts.enrollmentCancelled(activity.name),
-            style: styleRegular(color: cWhite),
-          ),
-          backgroundColor: cRedError,
-        ),
-      );
-
-      onUserActivitiesChanged(updatedActivities);
-
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+    if (!confirmed || !context.mounted) {
+      return;
     }
+
+    // Cancel enrollment
+    final updatedActivities = await cubit.cancelEnrollment(activity);
+
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          uiTexts.enrollmentCancelled(activity.name),
+          style: styleRegular(color: cWhite),
+        ),
+        backgroundColor: cRedError,
+      ),
+    );
+
+    onUserActivitiesChanged(updatedActivities);
+
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
   }
 
   /// Handles activity conflict resolution
@@ -287,7 +303,7 @@ class AllActivitiesViewUseCases {
     Function(List<Activity>) onUserActivitiesChanged,
   ) async {
     stamp(
-      'AllActivitiesViewUseCases',
+      'handleActivityConflict',
       'Handling activity conflict between ${conflictingActivity.name} and ${newActivity.name}',
     );
 
@@ -301,28 +317,28 @@ class AllActivitiesViewUseCases {
       conflictingActivity,
     );
 
-    if (shouldReplace && context.mounted) {
-      final updatedActivities = await cubit.changeActivity(
-        conflictingActivity,
-        newActivity,
-      );
+    if (!shouldReplace || !context.mounted) return;
 
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            uiTexts.activityChanged(conflictingActivity.name, newActivity.name),
-            style: styleRegular(color: cWhite),
-          ),
-          backgroundColor: cGreen,
+    final updatedActivities = await cubit.changeActivity(
+      conflictingActivity,
+      newActivity,
+    );
+
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          uiTexts.activityChanged(conflictingActivity.name, newActivity.name),
+          style: styleRegular(color: cWhite),
         ),
-      );
+        backgroundColor: cGreen,
+      ),
+    );
 
-      onUserActivitiesChanged(updatedActivities);
+    onUserActivitiesChanged(updatedActivities);
 
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
-    }
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
   }
 
   /// Handles direct enrollment in an activity (no conflicts)
@@ -333,7 +349,7 @@ class AllActivitiesViewUseCases {
     Function(List<Activity>) onUserActivitiesChanged,
   ) async {
     stamp(
-      'AllActivitiesViewUseCases',
+      'handleDirectEnrollment',
       'Handling direct enrollment for: ${activity.name}',
     );
 
@@ -366,7 +382,7 @@ class AllActivitiesViewUseCases {
     UiTexts uiTexts,
   ) async {
     stamp(
-      'AllActivitiesViewUseCases',
+      'showCancelConfirmationDialog',
       'Showing cancel confirmation for: ${activity.name}',
     );
 
@@ -390,7 +406,7 @@ class AllActivitiesViewUseCases {
 
   /// Handles search text changes
   void handleSearch(BuildContext context, String query, UiTexts uiTexts) {
-    stamp('AllActivitiesViewUseCases', 'Handling search: $query');
+    stamp('handleSearch', 'Handling search: $query');
 
     context.read<AllActivitiesCubit>().filterActivities(query, uiTexts);
   }

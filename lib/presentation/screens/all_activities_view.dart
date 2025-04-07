@@ -79,15 +79,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Search bar
-                    ActivitySearchBar(
-                      controller: _searchController,
-                      isDesktop: layout.isDesktop,
-                      isMobileLandscape: layout.isMobileLandscape,
-                      constraints: constraints,
-                      onSearchChanged:
-                          (query) =>
-                              _useCases.handleSearch(context, query, _uiTexts),
-                    ),
+                    _buildSearchBar(layout, constraints),
 
                     // Spacing
                     SizedBox(height: layout.isMobileLandscape ? 16 : 24),
@@ -116,6 +108,20 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSearchBar(
+    ResponsiveLayoutHelper layout,
+    BoxConstraints constraints,
+  ) {
+    return ActivitySearchBar(
+      controller: _searchController,
+      isDesktop: layout.isDesktop,
+      isMobileLandscape: layout.isMobileLandscape,
+      constraints: constraints,
+      onSearchChanged:
+          (query) => _useCases.handleSearch(context, query, _uiTexts),
     );
   }
 }
