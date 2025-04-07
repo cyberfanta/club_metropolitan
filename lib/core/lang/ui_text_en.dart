@@ -196,6 +196,6 @@ class UiTextEn {
   }
 
   String get joinActivity {
-    return 'Join Activity';
+    return 'Enroll Activity';
   }
 }
