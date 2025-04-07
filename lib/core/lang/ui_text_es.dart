@@ -154,7 +154,48 @@ class UiTextEs {
     }
   }
 
-  String get cancelEnrollmentTitle => 'Cancelar Inscripción';
-  String get cancelEnrollmentQuestion => '¿Estás seguro que deseas cancelar tu inscripción en {0}?';
-  String get yesCancel => 'Sí, Cancelar';
+  String get cancelEnrollmentTitle {
+    return 'Cancelar Inscripción';
+  }
+
+  String get cancelEnrollmentQuestion {
+    return '¿Estás seguro que deseas cancelar tu inscripción en {0}?';
+  }
+
+  String get yesCancel {
+    return 'Sí, Cancelar';
+  }
+
+  // Today's activities
+  String get todayActivities {
+    return 'Actividades de Hoy';
+  }
+
+  // Activity conflict resolution
+  String get conflictDetectedTitle {
+    return 'Conflicto de Horario Detectado';
+  }
+
+  String activityConflictDescription(
+    String currentActivity,
+    String newActivity,
+  ) {
+    return 'Ya estás inscrito en "$currentActivity" a esta hora.\n¿Te gustaría cambiar a "$newActivity"?';
+  }
+
+  String get stayWithCurrent {
+    return 'Mantener Actual';
+  }
+
+  String get changeToNew {
+    return 'Cambiar a Nueva';
+  }
+
+  String replaceActivity(String activityName) {
+    return 'Reemplazar $activityName';
+  }
+
+  String get joinActivity {
+    return 'Unirse a la Actividad';
+  }
 }

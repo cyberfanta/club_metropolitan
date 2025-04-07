@@ -154,7 +154,48 @@ class UiTextEn {
     }
   }
 
-  String get cancelEnrollmentTitle => 'Cancel Enrollment';
-  String get cancelEnrollmentQuestion => 'Are you sure you want to cancel your enrollment in {0}?';
-  String get yesCancel => 'Yes, Cancel';
+  String get cancelEnrollmentTitle {
+    return 'Cancel Enrollment';
+  }
+
+  String get cancelEnrollmentQuestion {
+    return 'Are you sure you want to cancel your enrollment in {0}?';
+  }
+
+  String get yesCancel {
+    return 'Yes, Cancel';
+  }
+
+  // Today's activities
+  String get todayActivities {
+    return 'Today\'s Activities';
+  }
+
+  // Activity conflict resolution
+  String get conflictDetectedTitle {
+    return 'Schedule Conflict Detected';
+  }
+
+  String activityConflictDescription(
+    String currentActivity,
+    String newActivity,
+  ) {
+    return 'You are already enrolled in "$currentActivity" at this time.\nWould you like to switch to "$newActivity"?';
+  }
+
+  String get stayWithCurrent {
+    return 'Stay with Current';
+  }
+
+  String get changeToNew {
+    return 'Switch to New';
+  }
+
+  String replaceActivity(String activityName) {
+    return 'Replace $activityName';
+  }
+
+  String get joinActivity {
+    return 'Join Activity';
+  }
 }

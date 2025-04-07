@@ -17,6 +17,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().title;
     }
+
     return UiTextEn().title;
   }
 
@@ -65,6 +66,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().myActivities;
     }
+
     return UiTextEn().myActivities;
   }
 
@@ -72,6 +74,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().noActivitiesEnrolled;
     }
+
     return UiTextEn().noActivitiesEnrolled;
   }
 
@@ -79,6 +82,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().exploreActivities;
     }
+
     return UiTextEn().exploreActivities;
   }
 
@@ -86,6 +90,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().viewAllActivities;
     }
+
     return UiTextEn().viewAllActivities;
   }
 
@@ -94,6 +99,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().allActivities;
     }
+
     return UiTextEn().allActivities;
   }
 
@@ -101,6 +107,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().searchActivities;
     }
+
     return UiTextEn().searchActivities;
   }
 
@@ -108,6 +115,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().noActivitiesFound;
     }
+
     return UiTextEn().noActivitiesFound;
   }
 
@@ -115,6 +123,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().enrolled;
     }
+
     return UiTextEn().enrolled;
   }
 
@@ -122,6 +131,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().adjustable;
     }
+
     return UiTextEn().adjustable;
   }
 
@@ -130,6 +140,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().trainer;
     }
+
     return UiTextEn().trainer;
   }
 
@@ -137,6 +148,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().description;
     }
+
     return UiTextEn().description;
   }
 
@@ -144,6 +156,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().cancelEnrollment;
     }
+
     return UiTextEn().cancelEnrollment;
   }
 
@@ -151,6 +164,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().enroll;
     }
+
     return UiTextEn().enroll;
   }
 
@@ -158,6 +172,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().trainerNotAssigned;
     }
+
     return UiTextEn().trainerNotAssigned;
   }
 
@@ -165,6 +180,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().participants;
     }
+
     return UiTextEn().participants;
   }
 
@@ -172,6 +188,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().timeConflict;
     }
+
     return UiTextEn().timeConflict;
   }
 
@@ -185,6 +202,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().conflictDescription
             : UiTextEn().conflictDescription;
+
     return template
         .replaceAll('{0}', activityName)
         .replaceAll('{1}', getDayName(day))
@@ -197,6 +215,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().changeActivity;
     }
+
     return UiTextEn().changeActivity;
   }
 
@@ -205,6 +224,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().changeActivityQuestion
             : UiTextEn().changeActivityQuestion;
+
     return template.replaceAll('{0}', activity1).replaceAll('{1}', activity2);
   }
 
@@ -212,6 +232,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().yesChange;
     }
+
     return UiTextEn().yesChange;
   }
 
@@ -220,6 +241,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().changeActivityFor
             : UiTextEn().changeActivityFor;
+
     return template.replaceAll('{0}', activityName);
   }
 
@@ -227,6 +249,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().conflictingSchedule;
     }
+
     return UiTextEn().conflictingSchedule;
   }
 
@@ -235,6 +258,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().alreadyEnrolledMessage
             : UiTextEn().alreadyEnrolledMessage;
+
     return template.replaceAll('{0}', activityName);
   }
 
@@ -243,6 +267,7 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().getDayName(day);
     }
+
     return UiTextEn().getDayName(day);
   }
 
@@ -252,6 +277,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().enrollmentCancelled
             : UiTextEn().enrollmentCancelled;
+
     return template.replaceAll('{0}', activityName);
   }
 
@@ -260,6 +286,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().enrollmentSuccessful
             : UiTextEn().enrollmentSuccessful;
+
     return template.replaceAll('{0}', activityName);
   }
 
@@ -268,16 +295,18 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().activityChanged
             : UiTextEn().activityChanged;
+
     return template
         .replaceAll('{0}', oldActivity)
         .replaceAll('{1}', newActivity);
   }
 
-  // Cancel enrollment confirmation dialog
+  // Activity enrollment cancellation
   String get cancelEnrollmentTitle {
     if (_locale.languageCode == 'es') {
       return UiTextEs().cancelEnrollmentTitle;
     }
+
     return UiTextEn().cancelEnrollmentTitle;
   }
 
@@ -286,6 +315,7 @@ class UiTexts extends ChangeNotifier {
         _locale.languageCode == 'es'
             ? UiTextEs().cancelEnrollmentQuestion
             : UiTextEn().cancelEnrollmentQuestion;
+
     return template.replaceAll('{0}', activityName);
   }
 
@@ -293,6 +323,72 @@ class UiTexts extends ChangeNotifier {
     if (_locale.languageCode == 'es') {
       return UiTextEs().yesCancel;
     }
+
     return UiTextEn().yesCancel;
+  }
+
+  // Today's activities
+  String get todayActivities {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().todayActivities;
+    }
+
+    return UiTextEn().todayActivities;
+  }
+
+  // New texts for activity conflict resolution
+  String get conflictDetectedTitle {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().conflictDetectedTitle;
+    }
+
+    return UiTextEn().conflictDetectedTitle;
+  }
+
+  String activityConflictDescription(
+    String currentActivity,
+    String newActivity,
+  ) {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().activityConflictDescription(
+        currentActivity,
+        newActivity,
+      );
+    }
+
+    return UiTextEn().activityConflictDescription(currentActivity, newActivity);
+  }
+
+  String get stayWithCurrent {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().stayWithCurrent;
+    }
+
+    return UiTextEn().stayWithCurrent;
+  }
+
+  String get changeToNew {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().changeToNew;
+    }
+
+    return UiTextEn().changeToNew;
+  }
+
+  String replaceActivity(String activityName) {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().replaceActivity(activityName);
+    }
+
+    return UiTextEn().replaceActivity(activityName);
+  }
+
+  // Join activity text
+  String get joinActivity {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().joinActivity;
+    }
+
+    return UiTextEn().joinActivity;
   }
 }
