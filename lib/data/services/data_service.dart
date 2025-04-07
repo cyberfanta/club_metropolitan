@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import '../../domain/models/activity.dart';
+import '../../domain/models/member.dart';
 import '../../domain/models/trainer.dart';
 import '../../utils/stamp.dart';
 
@@ -17,6 +18,7 @@ class DataService {
   // Data caching
   List<Activity>? _activities;
   List<Trainer>? _trainers;
+  List<Member>? _members;
 
   // Current user ID (for demo purposes)
   final int _currentUserId = 1; // Assuming user with ID 1 for this demo
@@ -88,6 +90,35 @@ class DataService {
 
       return [];
     }
+  }
+
+  // Load user from JSON
+  Future<List<Member>> getMembers() async {
+    if (_members != null) {
+      return _members!;
+    }
+
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'assets/entry_data/list_members.json',
+      );
+      final List<dynamic> jsonList = json.decode(jsonString);
+
+      _members = jsonList.map((json) => Member.fromJson(json)).toList();
+
+      return _members!;
+    } catch (e) {
+      stamp('DataService', 'Error loading members: $e');
+
+      return [];
+    }
+  }
+
+  // Get member name
+  Future<String> getMemberName() async {
+    final members = await getMembers();
+    final member = members.first;
+    return member.fullName;
   }
 
   // Get activities where the current user is enrolled

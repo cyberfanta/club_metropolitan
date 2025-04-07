@@ -81,7 +81,7 @@ class ActivityDetailModal extends StatelessWidget {
 
           // Complete content with scroll
           Container(
-            margin: EdgeInsets.only(bottom: isMobileLandscape ? 84 : 72),
+            margin: EdgeInsets.only(bottom: isMobileLandscape ? 84 : 96),
             child: ListView(
               shrinkWrap: true,
               physics: isMobileLandscape

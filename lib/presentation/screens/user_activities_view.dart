@@ -26,6 +26,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
   final UserActivitiesViewUseCases _useCases = UserActivitiesViewUseCases();
   List<Activity> _userActivities = [];
   bool _isLoading = true;
+  String _memberName = "";
 
   late UiTexts _uiTexts;
 
@@ -39,28 +40,33 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
   @override
   void initState() {
     super.initState();
-
-    _loadUserActivities();
+    _loadUserData();
   }
-
-  Future<void> _loadUserActivities() async {
+  
+  Future<void> _loadUserData() async {
     setState(() {
       _isLoading = true;
     });
-
+    
     try {
-      final activities = await _dataService.getUserActivities();
-
+      // Cargar el nombre del usuario y las actividades en paralelo
+      final memberNameFuture = _dataService.getMemberName();
+      final activitiesFuture = _dataService.getUserActivities();
+      
+      // Esperar a que ambas cargas terminen
+      final results = await Future.wait([memberNameFuture, activitiesFuture]);
+      
       setState(() {
-        _userActivities = activities;
+        _memberName = results[0] as String;
+        _userActivities = results[1] as List<Activity>;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-
-      stamp('UserActivitiesView', 'Error loading user activities: $e');
+      
+      stamp('UserActivitiesView', 'Error loading user data: $e');
     }
   }
 
@@ -117,7 +123,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
         appBar: AppBar(
           backgroundColor: cWhite,
           elevation: 0,
-          title: Text(_uiTexts.myActivities, style: styleBold(fontSize: 20)),
+          title: Text("${_uiTexts.myActivities} ($_memberName)", style: styleBold(fontSize: 20)),
           actions: [
             IconButton(
               icon: Icon(Icons.list, color: cBlack),
@@ -128,7 +134,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     builder:
                         (context) => AllActivitiesView(
                           onUserActivitiesChanged: (_) {
-                            _loadUserActivities();
+                            _loadUserData();
                           },
                         ),
                   ),
@@ -168,7 +174,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                               builder:
                                   (context) => AllActivitiesView(
                                     onUserActivitiesChanged: (_) {
-                                      _loadUserActivities();
+                                      _loadUserData();
                                     },
                                   ),
                             ),
@@ -196,7 +202,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                   ),
                 )
                 : RefreshIndicator(
-                  onRefresh: _loadUserActivities,
+                  onRefresh: _loadUserData,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _userActivities.length,
