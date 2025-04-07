@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/lang/ui_texts.dart';
 import '../../core/theme/ui_colors.dart';
 import '../../core/theme/ui_text_styles.dart';
-import '../../data/services/data_service.dart';
+import '../../domain/cubit/user_activities/user_activities_cubit.dart';
+import '../../domain/cubit/user_activities/user_activities_state.dart';
 import '../../domain/models/activity.dart';
 import '../../domain/use_cases/screens/user_activities_view_use_cases.dart';
-import '../../utils/stamp.dart';
 import '../components/activity_card.dart';
 import '../components/activity_detail_modal.dart';
 import 'all_activities_view.dart';
@@ -22,12 +23,7 @@ class UserActivitiesView extends StatefulWidget {
 }
 
 class _UserActivitiesViewState extends State<UserActivitiesView> {
-  final DataService _dataService = DataService();
   final UserActivitiesViewUseCases _useCases = UserActivitiesViewUseCases();
-  List<Activity> _userActivities = [];
-  bool _isLoading = true;
-  String _memberName = "";
-
   late UiTexts _uiTexts;
 
   @override
@@ -40,34 +36,9 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-  
-  Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
-    
-    try {
-      // Cargar el nombre del usuario y las actividades en paralelo
-      final memberNameFuture = _dataService.getMemberName();
-      final activitiesFuture = _dataService.getUserActivities();
-      
-      // Esperar a que ambas cargas terminen
-      final results = await Future.wait([memberNameFuture, activitiesFuture]);
-      
-      setState(() {
-        _memberName = results[0] as String;
-        _userActivities = results[1] as List<Activity>;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      stamp('UserActivitiesView', 'Error loading user data: $e');
-    }
+
+    // Load all user data through the Cubit
+    context.read<UserActivitiesCubit>().loadUserData();
   }
 
   void _showActivityDetail(Activity activity) {
@@ -82,21 +53,88 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
             activity: activity,
             isUserEnrolled: true,
             onAction: () async {
-              // Cancel enrollment
-              final success = await _dataService.cancelEnrollment(activity.id);
+              // Show confirmation dialog before canceling enrollment
+              final confirmed = await _showCancelConfirmationDialog(activity);
 
-              if (success) {
-                setState(() {
-                  _userActivities.removeWhere((item) => item.id == activity.id);
-                });
+              if (confirmed && mounted) {
+                // Cancel enrollment using the Cubit
+                // ignore: use_build_context_synchronously
+                await context.read<UserActivitiesCubit>().cancelActivity(
+                  activity,
+                );
+
+                // Display feedback to the user about cancellation
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      _uiTexts.enrollmentCancelled(activity.name),
+                      style: styleRegular(color: cWhite),
+                    ),
+                    backgroundColor: cRedError,
+                  ),
+                );
+
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context);
               }
-
-              // ignore: use_build_context_synchronously
-              Navigator.pop(context);
             },
             actionLabel: _uiTexts.cancelEnrollment,
           ),
     );
+  }
+
+  // Show a confirmation dialog for canceling enrollment
+  Future<bool> _showCancelConfirmationDialog(Activity activity) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder:
+              (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.zero, // Square corners for the dialog
+                ),
+                title: Text(
+                  _uiTexts.cancelEnrollmentTitle,
+                  style: styleBold(fontSize: 18),
+                ),
+                content: Text(
+                  _uiTexts.cancelEnrollmentQuestion(activity.name),
+                  style: styleRegular(),
+                ),
+                actions: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius
+                                .zero, // Square corners for the 'No' button
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(_uiTexts.no, style: styleRegular()),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cRedError,
+                      foregroundColor: cWhite,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius
+                                .zero, // Square corners for the 'Yes' button
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: Text(
+                      _uiTexts.yesCancel,
+                      style: styleRegular(color: cWhite),
+                    ),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
   }
 
   @override
@@ -123,7 +161,16 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
         appBar: AppBar(
           backgroundColor: cWhite,
           elevation: 0,
-          title: Text("${_uiTexts.myActivities} ($_memberName)", style: styleBold(fontSize: 20)),
+          title: BlocBuilder<UserActivitiesCubit, UserActivitiesState>(
+            builder: (context, state) {
+              return Text(
+                state.isLoadingMember
+                    ? _uiTexts.myActivities
+                    : "${_uiTexts.myActivities} (${state.memberName})",
+                style: styleBold(fontSize: 20),
+              );
+            },
+          ),
           actions: [
             IconButton(
               icon: Icon(Icons.list, color: cBlack),
@@ -134,7 +181,9 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     builder:
                         (context) => AllActivitiesView(
                           onUserActivitiesChanged: (_) {
-                            _loadUserData();
+                            context
+                                .read<UserActivitiesCubit>()
+                                .refreshUserData();
                           },
                         ),
                   ),
@@ -144,81 +193,91 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
             ),
           ],
         ),
-        body:
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _userActivities.isEmpty
-                ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 80,
-                        color: adjustOpacity(cBlack, 0.3),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _uiTexts.noActivitiesEnrolled,
-                        style: styleRegular(
-                          fontSize: 18,
-                          color: adjustOpacity(cBlack, 0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => AllActivitiesView(
-                                    onUserActivitiesChanged: (_) {
-                                      _loadUserData();
-                                    },
-                                  ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cBlack,
-                          foregroundColor: cWhite,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          child: Text(
-                            _uiTexts.exploreActivities,
-                            style: styleMedium(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                : RefreshIndicator(
-                  onRefresh: _loadUserData,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _userActivities.length,
-                    itemBuilder: (context, index) {
-                      final activity = _userActivities[index];
+        body: BlocBuilder<UserActivitiesCubit, UserActivitiesState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: ActivityCard(
-                          activity: activity,
-                          onTap: () => _showActivityDetail(activity),
+            if (state.userActivities.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 80,
+                      color: adjustOpacity(cBlack, 0.3),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _uiTexts.noActivitiesEnrolled,
+                      style: styleRegular(
+                        fontSize: 18,
+                        color: adjustOpacity(cBlack, 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => AllActivitiesView(
+                                  onUserActivitiesChanged: (_) {
+                                    context
+                                        .read<UserActivitiesCubit>()
+                                        .refreshUserData();
+                                  },
+                                ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cBlack,
+                        foregroundColor: cWhite,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Text(
+                          _uiTexts.exploreActivities,
+                          style: styleMedium(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              );
+            }
+
+            return RefreshIndicator(
+              onRefresh:
+                  () => context.read<UserActivitiesCubit>().refreshUserData(),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.userActivities.length,
+                itemBuilder: (context, index) {
+                  final activity = state.userActivities[index];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: ActivityCard(
+                      activity: activity,
+                      onTap: () => _showActivityDetail(activity),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

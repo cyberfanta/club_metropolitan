@@ -56,7 +56,7 @@ class TwoButtonDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: backgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.zero,
         side: BorderSide(width: borderWidth, color: borderColor),
       ),
       actionsOverflowAlignment: OverflowBarAlignment.center,
@@ -99,7 +99,7 @@ class TwoButtonDialog extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     fixedSize: firstButtonSize,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
                   onPressed: firstButtonAction,
@@ -116,7 +116,7 @@ class TwoButtonDialog extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     fixedSize: secondButtonSize,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
                   onPressed: secondButtonAction,

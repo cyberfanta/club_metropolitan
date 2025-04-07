@@ -1,3 +1,5 @@
+import 'trainer.dart';
+
 class Activity {
   final int id;
   final String name;
@@ -33,14 +35,77 @@ class Activity {
 
   // To compare if two activities have the same schedule
   bool conflictsWith(Activity other) {
-    return day.toLowerCase() == other.day.toLowerCase() && 
-           startTime == other.startTime &&
-           endTime == other.endTime;
+    if (day.toLowerCase() != other.day.toLowerCase()) {
+      return false;
+    }
+
+    // Compare schedules using numerical time values
+    final selfStartMinutes = startHour * 60 + startMinute;
+    final selfEndMinutes = endHour * 60 + endMinute;
+    final otherStartMinutes = other.startHour * 60 + other.startMinute;
+    final otherEndMinutes = other.endHour * 60 + other.endMinute;
+
+    // There's a conflict if any part of the schedule overlaps
+    return (selfStartMinutes < otherEndMinutes &&
+        selfEndMinutes > otherStartMinutes);
   }
 
   // To check if a user is enrolled
   bool isMemberEnrolled(int memberId) {
     return enrolledMembers.contains(memberId);
+  }
+
+  // Getters for start and end hours and minutes
+  int get startHour {
+    try {
+      final parts = startTime.split(':');
+
+      return int.parse(parts[0]);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  int get startMinute {
+    try {
+      final parts = startTime.split(':');
+
+      return int.parse(parts[1]);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  int get endHour {
+    try {
+      final parts = endTime.split(':');
+
+      return int.parse(parts[0]);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  int get endMinute {
+    try {
+      final parts = endTime.split(':');
+
+      return int.parse(parts[1]);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  // Trainer getter for simplified access
+  Trainer get trainer {
+    return Trainer(
+      id: trainerId,
+      name: trainerName ?? 'Unknown',
+      lastName: trainerLastName ?? '',
+      dni: '',
+      cv: '',
+      activities: [],
+    );
   }
 
   // Factory constructor to create an activity from JSON
@@ -49,22 +114,23 @@ class Activity {
     final String timeString = json['horaClase'] ?? '';
     String startTime = '';
     String endTime = '';
-    
+
     if (timeString.contains('-')) {
-      List<String> timeParts = timeString.split('-').map((s) => s.trim()).toList();
+      List<String> timeParts =
+          timeString.split('-').map((s) => s.trim()).toList();
       startTime = timeParts.isNotEmpty ? timeParts[0] : '00:00';
       endTime = timeParts.length > 1 ? timeParts[1] : '00:00';
     } else if (timeString.isNotEmpty) {
       // If there is only one time, assume it's the start and provide a default end time
       startTime = timeString.trim();
-      
+
       // Try to calculate an end time by adding 1 hour to the start time
       try {
         if (startTime.contains(':')) {
           List<String> hourMin = startTime.split(':');
           int hour = int.parse(hourMin[0]);
           int min = hourMin.length > 1 ? int.parse(hourMin[1]) : 0;
-          
+
           hour = (hour + 1) % 24; // Add 1 hour, 24-hour cycle
           endTime = '$hour:${min.toString().padLeft(2, '0')}';
         } else {
@@ -89,8 +155,11 @@ class Activity {
       day: json['diaClase'],
       startTime: startTime,
       endTime: endTime,
-      capacity: json['capacidad'] ?? 20, // Default capacity to 20 if not provided
-      location: json['ubicacion'] ?? 'Sala principal', // Default location if not provided
+      capacity: json['capacidad'] ?? 20,
+      // Default capacity to 20 if not provided
+      location:
+          json['ubicacion'] ??
+          'Sala principal', // Default location if not provided
     );
   }
 
@@ -114,7 +183,7 @@ class Activity {
 
     return path;
   }
-  
+
   // For backward compatibility
   String get imageAssetPath => imagePath;
 }

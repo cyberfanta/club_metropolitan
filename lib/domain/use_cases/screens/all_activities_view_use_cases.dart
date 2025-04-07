@@ -37,6 +37,7 @@ class AllActivitiesViewUseCases {
       return List.from(allActivities);
     } else {
       final lowercaseQuery = query.toLowerCase();
+
       return allActivities.where((activity) {
         // If we have uiTexts, use the translated day name
         final bool dayMatch =
@@ -197,6 +198,9 @@ class AllActivitiesViewUseCases {
           barrierDismissible: true,
           builder:
               (context) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero, // Square corners for the dialog
+                ),
                 title: Text(
                   uiTexts.changeActivity,
                   style: styleBold(fontSize: 18),
@@ -210,18 +214,26 @@ class AllActivitiesViewUseCases {
                 ),
                 actions: [
                   TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero, // Square corners for the 'No' button
+                      ),
+                    ),
                     onPressed: () => Navigator.of(context).pop(false),
                     child: Text(uiTexts.no, style: styleRegular()),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: cBlack,
-                      foregroundColor: cWhite,
+                      backgroundColor: cOrange,
+                      foregroundColor: cBlack,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero, // Square corners for the 'Yes' button
+                      ),
                     ),
                     onPressed: () => Navigator.of(context).pop(true),
                     child: Text(
                       uiTexts.yesChange,
-                      style: styleRegular(color: cWhite),
+                      style: styleRegular(color: cBlack),
                     ),
                   ),
                 ],

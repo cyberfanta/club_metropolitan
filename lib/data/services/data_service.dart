@@ -64,10 +64,15 @@ class DataService {
 
       return _activities!;
     } catch (e) {
-      stamp('DataService', 'Error loading activities: $e');
+      stamp('getActivities', 'Error loading activities: $e');
 
       return [];
     }
+  }
+
+  // New method for cubits
+  Future<List<Activity>> getAllActivities() async {
+    return await getActivities();
   }
 
   // Load trainers from JSON
@@ -86,7 +91,7 @@ class DataService {
 
       return _trainers!;
     } catch (e) {
-      stamp('DataService', 'Error loading trainers: $e');
+      stamp('getTrainers', 'Error loading trainers: $e');
 
       return [];
     }
@@ -108,7 +113,7 @@ class DataService {
 
       return _members!;
     } catch (e) {
-      stamp('DataService', 'Error loading members: $e');
+      stamp('getMembers', 'Error loading members: $e');
 
       return [];
     }
@@ -116,9 +121,19 @@ class DataService {
 
   // Get member name
   Future<String> getMemberName() async {
-    final members = await getMembers();
-    final member = members.first;
-    return member.fullName;
+    try {
+      final members = await getMembers();
+      final member = members.firstWhere(
+        (m) => m.id == _currentUserId,
+        orElse: () => members.first,
+      );
+
+      return member.fullName;
+    } catch (e) {
+      stamp('getMemberName', 'Error getting member name: $e');
+
+      return "User";
+    }
   }
 
   // Get activities where the current user is enrolled
@@ -134,10 +149,14 @@ class DataService {
   List<Activity> getUserActivitiesSync() {
     if (_activities == null) {
       // If data is not loaded yet, return empty list
-      stamp('DataService', 'Warning: Attempting to access user activities before data is loaded');
+      stamp(
+        'getUserActivitiesSync',
+        'Warning: Attempting to access user activities before data is loaded',
+      );
+
       return [];
     }
-    
+
     return _activities!
         .where((activity) => activity.enrolledMembers.contains(_currentUserId))
         .toList();
@@ -159,6 +178,18 @@ class DataService {
     return false;
   }
 
+  // New method for cubits
+  Future<List<Activity>> enrollUserInActivity(int activityId) async {
+    final success = await enrollInActivity(activityId);
+
+    if (success) {
+      return getUserActivities();
+    }
+
+    // If enrollment failed, return current activities without changes
+    return getUserActivities();
+  }
+
   // Cancel enrollment from an activity
   Future<bool> cancelEnrollment(int activityId) async {
     final activities = await getActivities();
@@ -175,9 +206,21 @@ class DataService {
     return false;
   }
 
+  // New method for cubits
+  Future<List<Activity>> cancelActivityForUser(Activity activity) async {
+    final success = await cancelEnrollment(activity.id);
+
+    if (success) {
+      return getUserActivities();
+    }
+
+    // If cancellation failed, return current activities without changes
+    return getUserActivities();
+  }
+
   // Check if the current user has any time conflict with the given activity
   Future<bool> hasTimeConflict(Activity activity) async {
-    final userActivities = await getUserActivities();
+    final List<Activity> userActivities = await getUserActivities();
 
     // Skip the conflict check if the user is already enrolled in this activity
     if (activity.enrolledMembers.contains(_currentUserId)) {
@@ -185,7 +228,7 @@ class DataService {
     }
 
     return userActivities.any(
-      (userActivity) =>
+      (Activity userActivity) =>
           userActivity.id != activity.id &&
           userActivity.conflictsWith(activity),
     );

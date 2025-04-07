@@ -272,4 +272,27 @@ class UiTexts extends ChangeNotifier {
         .replaceAll('{0}', oldActivity)
         .replaceAll('{1}', newActivity);
   }
+
+  // Cancel enrollment confirmation dialog
+  String get cancelEnrollmentTitle {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().cancelEnrollmentTitle;
+    }
+    return UiTextEn().cancelEnrollmentTitle;
+  }
+
+  String cancelEnrollmentQuestion(String activityName) {
+    String template =
+        _locale.languageCode == 'es'
+            ? UiTextEs().cancelEnrollmentQuestion
+            : UiTextEn().cancelEnrollmentQuestion;
+    return template.replaceAll('{0}', activityName);
+  }
+
+  String get yesCancel {
+    if (_locale.languageCode == 'es') {
+      return UiTextEs().yesCancel;
+    }
+    return UiTextEn().yesCancel;
+  }
 }

@@ -153,4 +153,8 @@ class UiTextEn {
         return dayKey;
     }
   }
+
+  String get cancelEnrollmentTitle => 'Cancel Enrollment';
+  String get cancelEnrollmentQuestion => 'Are you sure you want to cancel your enrollment in {0}?';
+  String get yesCancel => 'Yes, Cancel';
 }

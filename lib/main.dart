@@ -8,11 +8,16 @@ import 'package:provider/provider.dart';
 import 'core/constants/static_data.dart';
 import 'core/lang/ui_texts.dart';
 import 'core/theme/ui_colors.dart';
+import 'data/services/data_service.dart';
+import 'domain/cubit/all_activities/all_activities_cubit.dart';
+import 'domain/cubit/user_activities/user_activities_cubit.dart';
 import 'presentation/screens/user_activities_view.dart';
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  final DataService dataService = DataService();
 
   runApp(
     MultiBlocProvider(
@@ -23,9 +28,12 @@ void main() {
             return UiTexts(systemLocale);
           },
         ),
-        // BlocProvider<CustomDropdownDataCubit>(
-        //   create: (context) => CustomDropdownDataCubit(),
-        // ),
+        BlocProvider<UserActivitiesCubit>(
+          create: (context) => UserActivitiesCubit(dataService),
+        ),
+        BlocProvider<AllActivitiesCubit>(
+          create: (context) => AllActivitiesCubit(dataService),
+        ),
       ],
       child: const MyApp(),
     ),
