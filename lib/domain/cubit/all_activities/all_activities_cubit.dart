@@ -2,14 +2,24 @@ import 'package:bloc/bloc.dart';
 import 'package:club_metropolitan/domain/cubit/all_activities/all_activities_state.dart';
 import 'package:club_metropolitan/domain/models/activity.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../core/lang/ui_texts.dart';
 import '../../../data/services/data_service.dart';
 import '../../../utils/stamp.dart';
 
 class AllActivitiesCubit extends Cubit<AllActivitiesState> {
   final DataService _dataService;
+  late BuildContext _context;
+  late UiTexts _uiTexts;
 
   AllActivitiesCubit(this._dataService) : super(const AllActivitiesState());
+
+  // Set context to access UiTexts
+  void setContext(BuildContext context) {
+    _context = context;
+    _uiTexts = Provider.of<UiTexts>(_context, listen: false);
+  }
 
   Future<void> loadAllActivities() async {
     emit(state.copyWith(status: AllActivitiesStatus.loading, isLoading: true));
@@ -49,7 +59,7 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
     }
   }
 
-  void filterActivities(String query) {
+  void filterActivities(String query, [UiTexts? uiTexts]) {
     if (query.isEmpty) {
       emit(
         state.copyWith(
@@ -60,16 +70,47 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
       return;
     }
 
+    // Use provided uiTexts or try to get it from context
+    UiTexts? textsToUse = uiTexts;
+
+    if (textsToUse == null) {
+      try {
+        textsToUse = _uiTexts;
+      } catch (e) {
+        // If _uiTexts is not initialized, continue without it
+        stamp("filterActivities", "UiTexts not available: $e");
+      }
+    }
+
     final normalizedQuery = query.toLowerCase();
     final filtered =
         state.allActivities.where((activity) {
+          // Filter by activity name
           final name = activity.name.toLowerCase();
+
+          // Filter by activity description
           final description = activity.description.toLowerCase();
-          final trainer = activity.trainer.name.toLowerCase();
+
+          // Filter by trainer name
+          final trainerName = activity.trainer.name.toLowerCase();
+
+          // Filter by trainer last name
+          final trainerLastName = activity.trainer.lastName.toLowerCase();
+
+          // Filter by day of week (translated if uiTexts is available)
+          final bool dayMatch =
+              textsToUse != null
+                  ? textsToUse
+                      .getDayName(activity.day)
+                      .toLowerCase()
+                      .contains(normalizedQuery)
+                  : activity.day.toLowerCase().contains(normalizedQuery);
 
           return name.contains(normalizedQuery) ||
               description.contains(normalizedQuery) ||
-              trainer.contains(normalizedQuery);
+              trainerName.contains(normalizedQuery) ||
+              trainerLastName.contains(normalizedQuery) ||
+              dayMatch;
         }).toList();
 
     emit(

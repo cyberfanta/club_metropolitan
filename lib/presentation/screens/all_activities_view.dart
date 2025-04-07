@@ -74,6 +74,9 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
     super.didChangeDependencies();
 
     _uiTexts = Provider.of<UiTexts>(context);
+    
+    // Set context in cubit to access UiTexts
+    context.read<AllActivitiesCubit>().setContext(context);
   }
 
   @override
@@ -339,6 +342,7 @@ class _AllActivitiesViewState extends State<AllActivitiesView> {
                         onChanged: (query) {
                           context.read<AllActivitiesCubit>().filterActivities(
                             query,
+                            _uiTexts,
                           );
                         },
                         decoration: InputDecoration(
