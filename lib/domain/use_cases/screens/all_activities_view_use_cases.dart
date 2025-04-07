@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/lang/ui_texts.dart';
 import '../../../core/theme/ui_colors.dart';
+import '../../../core/theme/ui_text_styles.dart';
 import '../../../data/services/data_service.dart';
+import '../../../domain/cubit/all_activities/all_activities_cubit.dart';
 import '../../../domain/models/activity.dart';
+import '../../../presentation/components/activity_detail_modal.dart';
 import '../../../presentation/components/dialogs/activity_dialog.dart';
 import '../../../utils/stamp.dart';
 
@@ -81,23 +85,30 @@ class AllActivitiesViewUseCases {
     Activity newActivity,
     Activity conflictingActivity,
   ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Showing change activity dialog for ${newActivity.name}',
+    );
+
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => ActivityDialog(
-        title: uiTexts.conflictDetectedTitle,
-        content: uiTexts.activityConflictDescription(
-          conflictingActivity.name,
-          newActivity.name,
-        ),
-        negativeButtonText: uiTexts.stayWithCurrent,
-        positiveButtonText: uiTexts.changeToNew,
-        positiveButtonColor: cOrange,
-        positiveButtonTextColor: cBlack,
-        onPositivePressed: () => Navigator.of(context).pop(true),
-        onNegativePressed: () => Navigator.of(context).pop(false),
-      ),
-    ) ?? false;
+          context: context,
+          barrierDismissible: true,
+          builder:
+              (context) => ActivityDialog(
+                title: uiTexts.conflictDetectedTitle,
+                content: uiTexts.activityConflictDescription(
+                  conflictingActivity.name,
+                  newActivity.name,
+                ),
+                negativeButtonText: uiTexts.stayWithCurrent,
+                positiveButtonText: uiTexts.changeToNew,
+                positiveButtonColor: cOrange,
+                positiveButtonTextColor: cBlack,
+                onPositivePressed: () => Navigator.of(context).pop(true),
+                onNegativePressed: () => Navigator.of(context).pop(false),
+              ),
+        ) ??
+        false;
   }
 
   // Gets the appropriate action label based on enrollment status
@@ -110,11 +121,277 @@ class AllActivitiesViewUseCases {
     if (isEnrolled) {
       return uiTexts.cancelEnrollment;
     }
-    
+
     if (hasConflict && conflictingActivity != null) {
       return uiTexts.replaceActivity(conflictingActivity.name);
     }
-    
+
     return uiTexts.joinActivity;
+  }
+
+  /// Shows activity detail modal with enrollment options
+  void showActivityDetail(
+    BuildContext context,
+    Activity activity,
+    UiTexts uiTexts,
+    Function(List<Activity>) onUserActivitiesChanged,
+  ) {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Showing activity detail: ${activity.name}',
+    );
+
+    final cubit = context.read<AllActivitiesCubit>();
+    final bool isEnrolled = cubit.isUserEnrolled(activity);
+    
+    // Check if activity conflicts with another user activity
+    Activity? conflictingActivity;
+    bool hasConflict = false;
+    
+    if (!isEnrolled) {
+      // Check for conflicts only if not already enrolled
+      for (final userActivity in cubit.state.userActivities) {
+        if (userActivity.day == activity.day && 
+            cubit.timesOverlap(userActivity, activity)) {
+          hasConflict = true;
+          conflictingActivity = userActivity;
+          break;
+        }
+      }
+    }
+    
+    final actionLabel = getActionLabel(
+      uiTexts,
+      isEnrolled,
+      hasConflict,
+      conflictingActivity,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: cTransparent,
+      builder: (context) => ActivityDetailModal(
+        activity: activity,
+        isUserEnrolled: isEnrolled,
+        conflictingActivity: conflictingActivity,
+        onAction: () => handleEnrollment(
+          context,
+          activity,
+          uiTexts,
+          onUserActivitiesChanged,
+        ),
+        actionLabel: actionLabel,
+      ),
+    );
+  }
+
+  /// Handles activity enrollment, cancellation, or conflict resolution
+  Future<void> handleEnrollment(
+    BuildContext context,
+    Activity activity,
+    UiTexts uiTexts,
+    Function(List<Activity>) onUserActivitiesChanged,
+  ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Handling enrollment for: ${activity.name}',
+    );
+
+    final cubit = context.read<AllActivitiesCubit>();
+    final bool isEnrolled = cubit.isUserEnrolled(activity);
+    final Activity? conflictingActivity = await cubit.getConflictingActivity(
+      activity,
+    );
+    final bool hasConflict = conflictingActivity != null;
+
+    if (isEnrolled) {
+      await handleCancelEnrollment(
+        // ignore: use_build_context_synchronously
+        context,
+        activity,
+        uiTexts,
+        onUserActivitiesChanged,
+      );
+    } else if (hasConflict) {
+      await handleActivityConflict(
+        // ignore: use_build_context_synchronously
+        context,
+        activity,
+        conflictingActivity,
+        uiTexts,
+        onUserActivitiesChanged,
+      );
+    } else {
+      await handleDirectEnrollment(
+        // ignore: use_build_context_synchronously
+        context,
+        activity,
+        uiTexts,
+        onUserActivitiesChanged,
+      );
+    }
+  }
+
+  /// Handles cancellation of activity enrollment
+  Future<void> handleCancelEnrollment(
+    BuildContext context,
+    Activity activity,
+    UiTexts uiTexts,
+    Function(List<Activity>) onUserActivitiesChanged,
+  ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Handling cancel enrollment for: ${activity.name}',
+    );
+
+    final cubit = context.read<AllActivitiesCubit>();
+
+    // Show confirmation dialog before canceling enrollment
+    final confirmed = await showCancelConfirmationDialog(
+      context,
+      activity,
+      uiTexts,
+    );
+
+    if (confirmed && context.mounted) {
+      // Cancel enrollment
+      final updatedActivities = await cubit.cancelEnrollment(activity);
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            uiTexts.enrollmentCancelled(activity.name),
+            style: styleRegular(color: cWhite),
+          ),
+          backgroundColor: cRedError,
+        ),
+      );
+
+      onUserActivitiesChanged(updatedActivities);
+
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    }
+  }
+
+  /// Handles activity conflict resolution
+  Future<void> handleActivityConflict(
+    BuildContext context,
+    Activity newActivity,
+    Activity conflictingActivity,
+    UiTexts uiTexts,
+    Function(List<Activity>) onUserActivitiesChanged,
+  ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Handling activity conflict between ${conflictingActivity.name} and ${newActivity.name}',
+    );
+
+    final cubit = context.read<AllActivitiesCubit>();
+
+    // Show confirmation dialog to change activity
+    final shouldReplace = await showChangeActivityDialog(
+      context,
+      uiTexts,
+      newActivity,
+      conflictingActivity,
+    );
+
+    if (shouldReplace && context.mounted) {
+      final updatedActivities = await cubit.changeActivity(
+        conflictingActivity,
+        newActivity,
+      );
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            uiTexts.activityChanged(conflictingActivity.name, newActivity.name),
+            style: styleRegular(color: cWhite),
+          ),
+          backgroundColor: cGreen,
+        ),
+      );
+
+      onUserActivitiesChanged(updatedActivities);
+
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    }
+  }
+
+  /// Handles direct enrollment in an activity (no conflicts)
+  Future<void> handleDirectEnrollment(
+    BuildContext context,
+    Activity activity,
+    UiTexts uiTexts,
+    Function(List<Activity>) onUserActivitiesChanged,
+  ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Handling direct enrollment for: ${activity.name}',
+    );
+
+    final cubit = context.read<AllActivitiesCubit>();
+
+    // Enroll in activity
+    final updatedActivities = await cubit.enrollInActivity(activity);
+
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          uiTexts.enrollmentSuccessful(activity.name),
+          style: styleRegular(color: cWhite),
+        ),
+        backgroundColor: cGreen,
+      ),
+    );
+
+    onUserActivitiesChanged(updatedActivities);
+
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
+  }
+
+  /// Shows a confirmation dialog for canceling enrollment
+  Future<bool> showCancelConfirmationDialog(
+    BuildContext context,
+    Activity activity,
+    UiTexts uiTexts,
+  ) async {
+    stamp(
+      'AllActivitiesViewUseCases',
+      'Showing cancel confirmation for: ${activity.name}',
+    );
+
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder:
+              (context) => ActivityDialog(
+                title: uiTexts.cancelEnrollmentTitle,
+                content: uiTexts.cancelEnrollmentQuestion(activity.name),
+                negativeButtonText: uiTexts.no,
+                positiveButtonText: uiTexts.yesCancel,
+                positiveButtonColor: cRedError,
+                positiveButtonTextColor: cWhite,
+                onPositivePressed: () => Navigator.of(context).pop(true),
+                onNegativePressed: () => Navigator.of(context).pop(false),
+              ),
+        ) ??
+        false;
+  }
+
+  /// Handles search text changes
+  void handleSearch(BuildContext context, String query, UiTexts uiTexts) {
+    stamp('AllActivitiesViewUseCases', 'Handling search: $query');
+
+    context.read<AllActivitiesCubit>().filterActivities(query, uiTexts);
   }
 }

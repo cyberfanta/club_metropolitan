@@ -3,13 +3,13 @@ import 'package:provider/provider.dart';
 
 import '../../../core/lang/ui_texts.dart';
 import '../../../core/theme/ui_colors.dart';
-import '../../../domain/cubit/all_activities/all_activities_cubit.dart';
 
 class ActivitySearchBar extends StatelessWidget {
   final TextEditingController controller;
   final bool isDesktop;
   final bool isMobileLandscape;
   final BoxConstraints constraints;
+  final Function(String) onSearchChanged;
 
   const ActivitySearchBar({
     super.key,
@@ -17,6 +17,7 @@ class ActivitySearchBar extends StatelessWidget {
     required this.isDesktop,
     required this.isMobileLandscape,
     required this.constraints,
+    required this.onSearchChanged,
   });
 
   @override
@@ -43,9 +44,7 @@ class ActivitySearchBar extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
-        onChanged: (query) {
-          context.read<AllActivitiesCubit>().filterActivities(query, uiTexts);
-        },
+        onChanged: onSearchChanged,
         decoration: InputDecoration(
           hintText: uiTexts.searchActivities,
           prefixIcon: const Icon(Icons.search),

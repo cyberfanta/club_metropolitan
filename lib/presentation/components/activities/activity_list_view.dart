@@ -96,19 +96,21 @@ class ActivityListView extends StatelessWidget {
         if (userActivity.day == activity.day &&
             cubit.timesOverlap(userActivity, activity)) {
           hasConflict = true;
-
           break;
         }
       }
     }
 
-    return ActivityCard(
-      activity: activity,
-      onTap: () => onActivityTap(activity),
-      isDesktop: isDesktop,
-      isTablet: !isDesktop && useGridView,
-      isUserEnrolled: isEnrolled,
-      hasConflict: hasConflict,
+    return Padding(
+      padding: EdgeInsets.only(bottom: useGridView ? 0 : 16),
+      child: ActivityCard(
+        activity: activity,
+        onTap: () => onActivityTap(activity),
+        isDesktop: isDesktop,
+        isTablet: !isDesktop && useGridView,
+        isUserEnrolled: isEnrolled,
+        hasConflict: hasConflict,
+      ),
     );
   }
 }

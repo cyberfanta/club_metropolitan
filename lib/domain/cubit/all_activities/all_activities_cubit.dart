@@ -122,10 +122,42 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
     );
   }
 
+  /// Check if the current user is enrolled in the given activity
   bool isUserEnrolled(Activity activity) {
-    return state.userActivities.any(
-      (userActivity) => userActivity.id == activity.id,
+    final int currentUserId = _dataService.currentUserId;
+
+    // Log for debugging
+    stamp(
+      "AllActivitiesCubit",
+      "Checking if user $currentUserId is enrolled in ${activity.name}",
     );
+    stamp(
+      "AllActivitiesCubit",
+      "Enrolled members: ${activity.enrolledMembers}",
+    );
+
+    return activity.enrolledMembers.contains(currentUserId);
+  }
+
+  /// Check if two activities have overlapping times
+  bool timesOverlap(Activity activity1, Activity activity2) {
+    // Convert times to minutes for easy comparison
+    final act1StartMinutes = _timeToMinutes(activity1.startTime);
+    final act1EndMinutes = _timeToMinutes(activity1.endTime);
+    final act2StartMinutes = _timeToMinutes(activity2.startTime);
+    final act2EndMinutes = _timeToMinutes(activity2.endTime);
+
+    // Log for debugging
+    stamp(
+      "AllActivitiesCubit",
+      "Checking time overlap between ${activity1.name} (${activity1.startTime}-${activity1.endTime}) and ${activity2.name} (${activity2.startTime}-${activity2.endTime})",
+    );
+
+    // There's a conflict if start time of one activity is between start and end of the other
+    return (act1StartMinutes >= act2StartMinutes &&
+            act1StartMinutes < act2EndMinutes) ||
+        (act2StartMinutes >= act1StartMinutes &&
+            act2StartMinutes < act1EndMinutes);
   }
 
   Future<Activity?> getConflictingActivity(Activity activity) async {
@@ -147,20 +179,6 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
 
       return null;
     }
-  }
-
-  bool timesOverlap(Activity a, Activity b) {
-    final aStart = TimeOfDay(hour: a.startHour, minute: a.startMinute);
-    final aEnd = TimeOfDay(hour: a.endHour, minute: a.endMinute);
-    final bStart = TimeOfDay(hour: b.startHour, minute: b.startMinute);
-    final bEnd = TimeOfDay(hour: b.endHour, minute: b.endMinute);
-
-    final aStartMinutes = aStart.hour * 60 + aStart.minute;
-    final aEndMinutes = aEnd.hour * 60 + aEnd.minute;
-    final bStartMinutes = bStart.hour * 60 + bStart.minute;
-    final bEndMinutes = bEnd.hour * 60 + bEnd.minute;
-
-    return (aStartMinutes < bEndMinutes && aEndMinutes > bStartMinutes);
   }
 
   Future<List<Activity>> cancelEnrollment(Activity activity) async {
@@ -249,6 +267,26 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
       );
 
       return state.userActivities;
+    }
+  }
+
+  /// Convert a time string (HH:MM) to minutes
+  int _timeToMinutes(String time) {
+    final parts = time.split(':');
+
+    if (parts.length != 2) {
+      stamp("AllActivitiesCubit", "Invalid time format: $time");
+      return 0;
+    }
+
+    try {
+      final hours = int.parse(parts[0]);
+      final minutes = int.parse(parts[1]);
+
+      return hours * 60 + minutes;
+    } catch (e) {
+      stamp("AllActivitiesCubit", "Error parsing time: $time - $e");
+      return 0;
     }
   }
 }

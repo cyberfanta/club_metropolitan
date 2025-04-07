@@ -7,11 +7,8 @@ import '../../core/theme/ui_colors.dart';
 import '../../core/theme/ui_text_styles.dart';
 import '../../domain/cubit/user_activities/user_activities_cubit.dart';
 import '../../domain/cubit/user_activities/user_activities_state.dart';
-import '../../domain/models/activity.dart';
 import '../../domain/use_cases/screens/user_activities_view_use_cases.dart';
 import '../components/activity_card.dart';
-import '../components/activity_detail_modal.dart';
-import 'all_activities_view.dart';
 
 class UserActivitiesView extends StatefulWidget {
   const UserActivitiesView({super.key});
@@ -39,102 +36,6 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
 
     // Load all user data through the Cubit
     context.read<UserActivitiesCubit>().loadUserData();
-  }
-
-  void _showActivityDetail(Activity activity) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: true,
-      enableDrag: true,
-      backgroundColor: cTransparent,
-      builder:
-          (context) => ActivityDetailModal(
-            activity: activity,
-            isUserEnrolled: true,
-            onAction: () async {
-              // Show confirmation dialog before canceling enrollment
-              final confirmed = await _showCancelConfirmationDialog(activity);
-
-              if (confirmed && mounted) {
-                // Cancel enrollment using the Cubit
-                // ignore: use_build_context_synchronously
-                await context.read<UserActivitiesCubit>().cancelActivity(
-                  activity,
-                );
-
-                // Display feedback to the user about cancellation
-                // ignore: use_build_context_synchronously
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      _uiTexts.enrollmentCancelled(activity.name),
-                      style: styleRegular(color: cWhite),
-                    ),
-                    backgroundColor: cRedError,
-                  ),
-                );
-
-                // ignore: use_build_context_synchronously
-                Navigator.pop(context);
-              }
-            },
-            actionLabel: _uiTexts.cancelEnrollment,
-          ),
-    );
-  }
-
-  // Show a confirmation dialog for canceling enrollment
-  Future<bool> _showCancelConfirmationDialog(Activity activity) async {
-    return await showDialog<bool>(
-          context: context,
-          barrierDismissible: true,
-          builder:
-              (context) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.zero, // Square corners for the dialog
-                ),
-                title: Text(
-                  _uiTexts.cancelEnrollmentTitle,
-                  style: styleBold(fontSize: 18),
-                ),
-                content: Text(
-                  _uiTexts.cancelEnrollmentQuestion(activity.name),
-                  style: styleRegular(),
-                ),
-                actions: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius
-                                .zero, // Square corners for the 'No' button
-                      ),
-                    ),
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text(_uiTexts.no, style: styleRegular()),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cRedError,
-                      foregroundColor: cWhite,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius
-                                .zero, // Square corners for the 'Yes' button
-                      ),
-                    ),
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: Text(
-                      _uiTexts.yesCancel,
-                      style: styleRegular(color: cWhite),
-                    ),
-                  ),
-                ],
-              ),
-        ) ??
-        false;
   }
 
   @override
@@ -173,22 +74,12 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.list, color: cBlack),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => AllActivitiesView(
-                          onUserActivitiesChanged: (_) {
-                            context
-                                .read<UserActivitiesCubit>()
-                                .refreshUserData();
-                          },
-                        ),
+              icon: const Icon(Icons.list, color: cBlack),
+              onPressed:
+                  () => _useCases.navigateToAllActivities(
+                    context,
+                    () => context.read<UserActivitiesCubit>().refreshUserData(),
                   ),
-                );
-              },
               tooltip: _uiTexts.viewAllActivities,
             ),
           ],
@@ -219,21 +110,14 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => AllActivitiesView(
-                                  onUserActivitiesChanged: (_) {
-                                    context
-                                        .read<UserActivitiesCubit>()
-                                        .refreshUserData();
-                                  },
-                                ),
+                      onPressed:
+                          () => _useCases.navigateToAllActivities(
+                            context,
+                            () =>
+                                context
+                                    .read<UserActivitiesCubit>()
+                                    .refreshUserData(),
                           ),
-                        );
-                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: cBlack,
                         foregroundColor: cWhite,
@@ -270,7 +154,12 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: ActivityCard(
                       activity: activity,
-                      onTap: () => _showActivityDetail(activity),
+                      onTap:
+                          () => _useCases.showActivityDetail(
+                            context,
+                            activity,
+                            _uiTexts,
+                          ),
                     ),
                   );
                 },
