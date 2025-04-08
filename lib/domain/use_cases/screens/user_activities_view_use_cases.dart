@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/lang/ui_texts.dart';
 import '../../../core/theme/ui_colors.dart';
@@ -156,5 +157,23 @@ class UserActivitiesViewUseCases {
         backgroundColor: cRedError,
       ),
     );
+  }
+
+  /// Opens a URL in the browser
+  Future<void> openUrl(BuildContext context, String url) async {
+    stamp('openUrl', 'Opening URL: $url');
+
+    final Uri uri = Uri.parse(url);
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open URL'),
+            backgroundColor: cRedError,
+          ),
+        );
+      }
+    }
   }
 }

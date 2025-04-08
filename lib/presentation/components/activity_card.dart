@@ -28,7 +28,7 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener UiTexts del Provider correctamente
+    // Get UiTexts correctly from Provider
     final uiTexts = Provider.of<UiTexts>(context);
 
     // Fixed dimensions to prevent layout breaks

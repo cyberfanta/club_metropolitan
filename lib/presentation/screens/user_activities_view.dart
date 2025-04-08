@@ -84,42 +84,116 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
             ),
           ],
         ),
-        body: BlocBuilder<UserActivitiesCubit, UserActivitiesState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: Stack(
+          children: [
+            // Background with author and GitHub link
+            Positioned.fill(child: _buildBackgroundCredit()),
+            // Main content
+            BlocBuilder<UserActivitiesCubit, UserActivitiesState>(
+              builder: (context, state) {
+                if (state.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            if (state.userActivities.isEmpty) {
-              return _buildEmptyState();
-            }
+                if (state.userActivities.isEmpty) {
+                  return _buildEmptyState();
+                }
 
-            return RefreshIndicator(
-              onRefresh:
-                  () => context.read<UserActivitiesCubit>().refreshUserData(),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.userActivities.length,
-                itemBuilder: (context, index) {
-                  final activity = state.userActivities[index];
+                return RefreshIndicator(
+                  onRefresh:
+                      () =>
+                          context.read<UserActivitiesCubit>().refreshUserData(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: state.userActivities.length,
+                    itemBuilder: (context, index) {
+                      final activity = state.userActivities[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ActivityCard(
-                      activity: activity,
-                      onTap:
-                          () => _useCases.showActivityDetail(
-                            context,
-                            activity,
-                            _uiTexts,
-                          ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: ActivityCard(
+                          activity: activity,
+                          onTap:
+                              () => _useCases.showActivityDetail(
+                                context,
+                                activity,
+                                _uiTexts,
+                              ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBackgroundCredit() {
+    String gitHubUrl = 'https://github.com/cyberfanta/club_metropolitan';
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Logo image (will be displayed when available)
+          const Spacer(),
+          Image.asset(
+            'assets/images/extras/club_metropolitan_logo.png',
+            width: 120,
+            height: 120,
+            opacity: const AlwaysStoppedAnimation<double>(0.4),
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: adjustOpacity(cOrange, 0.05),
+                ),
+                child: Icon(
+                  Icons.fitness_center,
+                  size: 60,
+                  color: adjustOpacity(cOrange, 0.2),
+                ),
+              );
+            },
+          ),
+          // Creator information
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Julio César León",
+                  style: styleRegular(
+                    color: adjustOpacity(cBlack, 0.5),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () async {
+                    await _useCases.openUrl(context, gitHubUrl);
+                  },
+                  child: Text(
+                    gitHubUrl,
+                    style: styleRegular(
+                      color: adjustOpacity(cBlack, 0.5),
+                      fontSize: 12,
+                      useUnderline: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
