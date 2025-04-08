@@ -112,6 +112,16 @@ Banner
     <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
 </div>
 
+## License 📄
+
+This project is licensed under the MIT License with attribution requirements - see the [LICENSE.md](https://github.com/cyberfanta/club_metropolitan/blob/main/LICENSE.md) file for details. If you use any part of this code, you must provide attribution to the original author, Julio César León.
+
+## Changelog 📄
+
+Click
+here [CHANGELOG.md](https://github.com/cyberfanta/club_metropolitan/blob/main/CHANGELOG.md) for
+details.
+
 ## Author ✒️
 
 * **Julio César León** - *Developer* - [Julio César León](https://github.com/cyberfanta)
