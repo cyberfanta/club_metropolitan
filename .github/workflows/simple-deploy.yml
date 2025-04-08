@@ -2,6 +2,9 @@ name: Simple Deploy to GitHub Pages
  
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
  
 jobs:
   build:
