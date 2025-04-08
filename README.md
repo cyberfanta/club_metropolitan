@@ -105,6 +105,10 @@ flutter test --verbose
 - Start an iOS simulator or Android emulator
 - Run `flutter run` from the command line or use your IDE's run button
 
+**Option 3: Using the APK file and your cellphone**
+- Download the APK file from the GitHub repository [APK File](https://github.com/cyberfanta/club_metropolitan/blob/master/apk/app-release.apk) into your cellphone
+- Follow the instructions here to [Install an APK file on your Android device from unknown sources](https://www.appaloosa.io/blog/guides/how-to-install-apps-from-unknown-sources-in-android)
+
 ## Architecture 🚀
 
 This project was built using [Flutter](https://flutter.dev/) following the principles of clean architecture:
