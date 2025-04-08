@@ -1,14 +1,7 @@
-name: Flutter Web to GitHub Pages
+name: Simple Deploy to GitHub Pages
  
 on:
-  push:
-    branches: [ master ]
   workflow_dispatch:
- 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
  
 jobs:
   build:
@@ -50,14 +43,9 @@ jobs:
           # Add banner and social media preview info
           sed -i 's|</head>|<meta property="og:image" content="assets/images/extras/club_metropolitan_banner.svg" />\n<meta property="og:title" content="Club Metropolitan" />\n<meta property="og:description" content="Fitness Activities App - Developed by Julio César León" />\n</head>|g' build/web/index.html
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './build/web'
-      
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/web
+          branch: gh-pages
+          clean: true 
