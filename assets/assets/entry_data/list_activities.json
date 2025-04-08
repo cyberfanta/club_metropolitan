@@ -1,0 +1,62 @@
+[
+    {
+      "idActividadColectiva": 1,
+      "nombreActividadColectiva": "PADEL",
+      "descripcion": "Nibh eros natoque lacus litora ornare egestas leo elementum sociosqu convallis diam parturient potenti cubilia euismod, fames eu dignissim tincidunt et volutpat eleifend accumsan class consequat tempor at justo viverra.",
+      "imagen": "images/PADEL--300x119.jpg",
+      "entrenadorResponsable": 2,
+      "sociosInscritos": [1,4,5,8,10,12],
+      "diaClase": "lunes",
+      "horaClase": "9:00"
+    },
+    {
+      "idActividadColectiva": 2,
+      "nombreActividadColectiva": "SPINNING",
+      "descripcion": "Dignissim montes sed porttitor vehicula vulputate vivamus ultricies, blandit lacus sem consequat nostra lectus facilisi, faucibus litora nullam senectus suspendisse torquent. Accumsan cubilia imperdiet erat sociosqu egestas donec, augue suscipit curabitur etiam id maecenas morbi, volutpat molestie orci nisi purus.",
+      "imagen": "images/CYCLING-5-300x225.jpg",
+      "entrenadorResponsable": 1,
+      "sociosInscritos": [3,4,5,6,7,8,9],
+      "diaClase": "lunes",
+      "horaClase": "11:00"
+    },
+    {
+      "idActividadColectiva": 3,
+      "nombreActividadColectiva": "PADEL",
+      "descripcion": "Nulla mus natoque facilisis egestas per cubilia, pulvinar feugiat nibh tellus ornare vestibulum, auctor fames orci praesent mi. Nascetur pellentesque congue interdum netus, viverra hac.",
+      "imagen": "images/IMAGEN_PADEL_PROVIS-300x192.jpg",
+      "entrenadorResponsable": 3,
+      "sociosInscritos": [9,10,12,14],
+      "diaClase": "martes",
+      "horaClase": "10:00"
+    },
+    {
+      "idActividadColectiva": 4,
+      "nombreActividadColectiva": "YOGA",
+      "descripcion": "Sociis vestibulum dictum mollis nulla risus blandit, gravida taciti vivamus elementum. Aptent dictumst porta etiam suscipit inceptos luctus donec magna, vehicula at urna aliquet venenatis nibh parturient fringilla, congue montes et nascetur tristique lectus semper.",
+      "imagen": "images/SALA_ACTIVIDADES_02-300x225.jpg",
+      "entrenadorResponsable": 3,
+      "sociosInscritos": [5,7,8,11,12,13],
+      "diaClase": "miercoles",
+      "horaClase": "17:00"
+    },
+    {
+      "idActividadColectiva": 5,
+      "nombreActividadColectiva": "SPINNING",
+      "descripcion": "Aliquet est nullam orci litora ad penatibus suspendisse proin rutrum nam, ridiculus sem lacinia cras volutpat dapibus nisl justo tortor tempus, ultrices sed vitae phasellus vestibulum lectus lacus magnis nisi.",
+      "imagen": "simages/CARDIO-2-300x225.jpg",
+      "entrenadorResponsable": 1,
+      "sociosInscritos": [1,2,3,4,5,6],
+      "diaClase": "miercoles",
+      "horaClase": "17:00"
+    },
+    {
+      "idActividadColectiva": 9,
+      "nombreActividadColectiva": "YOGA",
+      "descripcion": "Hac nulla aliquam conubia class massa ullamcorper senectus ligula scelerisque id, aenean pharetra dictumst molestie odio fermentum neque torquent sociosqu rhoncus, himenaeos varius nostra mauris mattis semper ridiculus donec at. Euismod quisque lobortis habitasse risus, pulvinar elementum.",
+      "imagen": "images/SALA_ACTIVIDADES_02-300x225.jpg",
+      "entrenadorResponsable": 2,
+      "sociosInscritos": [2,4,5,7,10,14],
+      "diaClase": "jueves",
+      "horaClase": "9:00"
+    }
+  ]
