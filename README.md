@@ -2,7 +2,7 @@
 
 A Flutter application for Club Metropolitan fitness centers that allows members to browse, enroll and manage their fitness activities.
 
-[![Deploy to GitHub Pages](https://github.com/cyberfanta/club_metropolitan/actions/workflows/deploy.yml/badge.svg)](https://github.com/cyberfanta/club_metropolitan/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/cyberfanta/club_metropolitan/actions/workflows/flutter-pages.yml/badge.svg)](https://github.com/cyberfanta/club_metropolitan/actions/workflows/flutter-pages.yml)
 
 ## Live Demo 🌐
 
@@ -10,6 +10,17 @@ You can try this application directly in your browser:
 [Club Metropolitan Web Demo](https://cyberfanta.github.io/club_metropolitan/)
 
 Note: The web version is optimized for desktop and mobile browsers.
+
+### GitHub Pages Deployment
+
+This project is configured to automatically deploy to GitHub Pages when changes are pushed to the master branch. The deployment is handled by a GitHub Actions workflow defined in `.github/workflows/flutter-pages.yml`.
+
+Key features of the deployment:
+- Automatically builds the Flutter web app
+- Generates launcher icons and splash screen
+- Includes assets for social media sharing
+- Configures proper redirects for SPA routing
+- Uses GitHub's official Pages deployment action
 
 ## Features
 

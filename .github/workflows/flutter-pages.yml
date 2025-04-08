@@ -34,12 +34,21 @@ jobs:
       - name: Build web
         run: flutter build web --release --base-href "/"
       
+      - name: Copy assets for social sharing
+        run: |
+          mkdir -p build/web/assets/images/extras
+          cp -r assets/images/extras/club_metropolitan_logo.svg build/web/assets/images/extras/ || echo "Logo not found, continuing..."
+          cp -r assets/images/extras/club_metropolitan_banner.svg build/web/assets/images/extras/ || echo "Banner not found, continuing..."
+      
       - name: Create additional files
         run: |
           touch build/web/.nojekyll
           echo "DirectoryIndex index.html" > build/web/.htaccess
           echo "ErrorDocument 404 /index.html" >> build/web/.htaccess
           echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Club Metropolitan</title><script>window.location.href = "/";</script></head><body><h1>Redirecting...</h1><p><a href="/">Click here if not redirected</a></p></body></html>' > build/web/404.html
+          
+          # Add banner and social media preview info
+          sed -i 's|</head>|<meta property="og:image" content="assets/images/extras/club_metropolitan_banner.svg" />\n<meta property="og:title" content="Club Metropolitan" />\n<meta property="og:description" content="Fitness Activities App - Developed by Julio César León" />\n</head>|g' build/web/index.html
       
       - name: Setup Pages
         uses: actions/configure-pages@v3
