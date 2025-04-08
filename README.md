@@ -2,6 +2,15 @@
 
 A Flutter application for Club Metropolitan fitness centers that allows members to browse, enroll and manage their fitness activities.
 
+[![Deploy to GitHub Pages](https://github.com/cyberfanta/club_metropolitan/actions/workflows/deploy.yml/badge.svg)](https://github.com/cyberfanta/club_metropolitan/actions/workflows/deploy.yml)
+
+## Live Demo 🌐
+
+You can try this application directly in your browser:
+[Club Metropolitan Web Demo](https://cyberfanta.github.io/club_metropolitan/)
+
+Note: The web version is optimized for desktop and mobile browsers.
+
 ## Features
 
 - View and filter available fitness activities
@@ -84,7 +93,12 @@ The application features a modern and clean UI with:
 
 Logo
 <div style="display: flex; justify-content: center;">
-    <img src="https://github.com/cyberfanta/club_metropolitan/blob/main/assets/images/extras/club_metropolitan_logo.png" height="100"/>
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/main/assets/images/extras/club_metropolitan_logo.svg" height="100"/>
+</div>
+
+Banner
+<div style="display: flex; justify-content: center;">
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/main/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
 </div>
 
 ## Author ✒️

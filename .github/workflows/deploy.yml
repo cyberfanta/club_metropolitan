@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.7.0'
+          channel: 'stable'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
+      
+      - name: Generate splash screen
+        run: dart run flutter_native_splash:create
+      
+      - name: Build web
+        run: flutter build web --release --base-href /club_metropolitan/
+      
+      - name: Create assets directory in web build
+        run: |
+          mkdir -p build/web/assets/images/extras
+          cp assets/images/extras/club_metropolitan_logo.svg build/web/assets/images/extras/
+          cp assets/images/extras/club_metropolitan_banner.svg build/web/assets/images/extras/
+      
+      - name: Create .nojekyll file
+        run: touch build/web/.nojekyll
+      
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/web
+          branch: gh-pages
+          clean: true 

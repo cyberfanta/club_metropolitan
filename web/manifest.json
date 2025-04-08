@@ -1,11 +1,11 @@
 {
-    "name": "club_metropolitan",
-    "short_name": "club_metropolitan",
+    "name": "Club Metropolitan",
+    "short_name": "Metropolitan",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#8B0000",
-    "description": "A new Flutter project.",
+    "description": "Club Metropolitan fitness activities app",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
