@@ -170,6 +170,7 @@ class _UserActivitiesViewState extends State<UserActivitiesView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
+                  key: Key("MyName"),
                   "Julio César León",
                   style: styleRegular(
                     color: adjustOpacity(cBlack, 0.5),

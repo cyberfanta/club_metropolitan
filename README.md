@@ -71,6 +71,30 @@ Key features of the deployment:
    dart run flutter_native_splash:create
    ```
 
+### Running Tests 🧪
+
+#### Unit Tests
+To run all the unit tests:
+```
+flutter test
+```
+
+To run a specific test file:
+```
+flutter test test/unit/domain/cubit/all_activities/all_activities_cubit_test.dart
+```
+
+#### Integration Tests
+To run integration tests on a connected device:
+```
+flutter test integration_test/app_test.dart
+```
+
+For detailed test results with timestamps:
+```
+flutter test --verbose
+```
+
 ### Running the App 📦
 
 **Option 1: On Physical Device**
