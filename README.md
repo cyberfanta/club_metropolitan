@@ -4,7 +4,29 @@ A Flutter application for Club Metropolitan fitness centers that allows members 
 
 [![Deploy to GitHub Pages](https://github.com/cyberfanta/club_metropolitan/actions/workflows/flutter-pages.yml/badge.svg)](https://github.com/cyberfanta/club_metropolitan/actions/workflows/flutter-pages.yml)
 
-## Live Demo 🌐
+## Features
+
+- View and filter available fitness activities
+- Enroll in activities and manage your schedule
+- View detailed information about each activity (trainer, location, time)
+- Handle scheduling conflicts with automatic detection
+- Responsive design for all device sizes
+
+## Screenshots
+
+### Logo
+<div style="display: flex; justify-content: center;">
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_logo.svg" height="100"/>
+</div>
+
+### Banner
+<div style="display: flex; justify-content: center;">
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
+</div>
+
+## Demo
+
+### Live Demo 🌐
 
 You can try this application directly in your browser:
 [Club Metropolitan Web Demo](https://cyberfanta.github.io/club_metropolitan/)
@@ -22,69 +44,44 @@ Key features of the deployment:
 - Configures proper redirects for SPA routing
 - Uses GitHub's official Pages deployment action
 
-## Features
-
-- View and filter available fitness activities
-- Enroll in activities and manage your schedule
-- View detailed information about each activity (trainer, location, time)
-- Handle scheduling conflicts with automatic detection
-- Responsive design for all device sizes
-
 ## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view
-the [online documentation](https://docs.flutter.dev/), which offers tutorials, samples, guidance on
-mobile development, and a full API reference.
-
-## To Obtain 🚀
-
-Clone this repo to your computer using any Git manager.
-
-Use this url -> https://github.com/cyberfanta/club_metropolitan.git
 
 ### Requirements 📋
 
 - Flutter SDK 3.7.0 or higher
-- Last version of [Android Studio](https://developer.android.com/studio) or [VS Code](https://code.visualstudio.com/)
+- Latest version of [Android Studio](https://developer.android.com/studio) or [VS Code](https://code.visualstudio.com/)
 
 ### Installation 🔧
 
-```
-* Clone the repository
-* Run 'flutter pub get' to install dependencies
-* Generate icons and splash screen with:
-  - dart run flutter_launcher_icons
-  - dart run flutter_native_splash:create
-```
+1. Clone the repository
+   ```
+   git clone https://github.com/cyberfanta/club_metropolitan.git
+   ```
 
-### To Run It 📦
+2. Install dependencies
+   ```
+   flutter pub get
+   ```
 
-```
-You have 2 options:
+3. Generate icons and splash screen
+   ```
+   dart run flutter_launcher_icons
+   dart run flutter_native_splash:create
+   ```
 
-1. By Hardware
-* Connect your Android/iOS device to your computer using a USB cable.
-* Run 'flutter run' from the command line or use your IDE's run button.
+### Running the App 📦
 
-2. By Simulator/Emulator
-* Start an iOS simulator or Android emulator
-* Run 'flutter run' from the command line or use your IDE's run button.
-```
+**Option 1: On Physical Device**
+- Connect your Android/iOS device to your computer using a USB cable
+- Run `flutter run` from the command line or use your IDE's run button
 
----
+**Option 2: On Emulator/Simulator**
+- Start an iOS simulator or Android emulator
+- Run `flutter run` from the command line or use your IDE's run button
 
 ## Architecture 🚀
 
-This project was made using [Flutter](https://flutter.dev/) following the principles of clean architecture.
-
-Created using:
+This project was built using [Flutter](https://flutter.dev/) following the principles of clean architecture:
 
 - **Clean Architecture**: [Separation of concerns into layers](https://resocoder.com/2019/08/27/flutter-tdd-clean-architecture-course-1-explanation-project-structure/) (domain, data, presentation)
 - **BLoC/Cubit Pattern**: [For state management](https://bloclibrary.dev/#/coreconcepts) with the [flutter_bloc package](https://pub.dev/packages/flutter_bloc)
@@ -100,32 +97,28 @@ The application features a modern and clean UI with:
 - Responsive grid and list layouts
 - Custom icons and splash screen
 
-## Screenshots 🖼
-
-Logo
-<div style="display: flex; justify-content: center;">
-    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_logo.svg" height="100"/>
-</div>
-
-Banner
-<div style="display: flex; justify-content: center;">
-    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
-</div>
-
 ## License 📄
 
 This project is licensed under the MIT License with attribution requirements - see the [LICENSE.md](https://github.com/cyberfanta/club_metropolitan/blob/master/LICENSE.md) file for details. If you use any part of this code, you must provide attribution to the original author, Julio César León.
 
 ## Changelog 📄
 
-Click
-here [CHANGELOG.md](https://github.com/cyberfanta/club_metropolitan/blob/master/CHANGELOG.md) for
-details.
+Click here [CHANGELOG.md](https://github.com/cyberfanta/club_metropolitan/blob/master/CHANGELOG.md) for details related with the creation process of this project.
 
 ## Author ✒️
 
-* **Julio César León** - *Developer* - [Julio César León](https://github.com/cyberfanta)
+**Julio César León** - *Developer* - [GitHub Profile](https://github.com/cyberfanta)
 
 Project Link: [Club Metropolitan](https://github.com/cyberfanta/club_metropolitan)
 
-Enjoy our app.
+---
+
+### Further Learning Resources
+
+For more information on Flutter development:
+
+- [Flutter Documentation](https://docs.flutter.dev/) - Official Flutter documentation
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+
+Enjoy the app!
