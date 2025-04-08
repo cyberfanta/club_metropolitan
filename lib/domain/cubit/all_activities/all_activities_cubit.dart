@@ -99,13 +99,22 @@ class AllActivitiesCubit extends Cubit<AllActivitiesState> {
           final trainerLastName = activity.trainer.lastName.toLowerCase();
 
           // Filter by day of week (translated if uiTexts is available)
-          final bool dayMatch =
-              textsToUse != null
-                  ? textsToUse
-                      .getDayName(activity.day)
-                      .toLowerCase()
-                      .contains(normalizedQuery)
-                  : activity.day.toLowerCase().contains(normalizedQuery);
+          bool dayMatch = false;
+          
+          if (textsToUse != null) {
+            // First we try with the translated day
+            final translatedDay = textsToUse.getDayName(activity.day).toLowerCase();
+            dayMatch = translatedDay.contains(normalizedQuery);
+            
+            // If there's no match, we check if the user is searching for a day in another language
+            // and compare it with the original day
+            if (!dayMatch) {
+              dayMatch = activity.day.toLowerCase().contains(normalizedQuery);
+            }
+          } else {
+            // If UiTexts is not available, we use only the original day
+            dayMatch = activity.day.toLowerCase().contains(normalizedQuery);
+          }
 
           return name.contains(normalizedQuery) ||
               description.contains(normalizedQuery) ||
