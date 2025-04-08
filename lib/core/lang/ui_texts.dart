@@ -10,6 +10,7 @@ class UiTexts extends ChangeNotifier {
 
   set locale(Locale locale) {
     _locale = locale;
+
     notifyListeners();
   }
 
