@@ -1,0 +1,17 @@
+DirectoryIndex index.html
+
+# Redirigir 404s a index.html para SPA
+ErrorDocument 404 /index.html
+
+# Habilitar reescritura de URL
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /club_metropolitan/
+  
+  # Si la solicitud no es un archivo o directorio existente
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Redirigir a index.html
+  RewriteRule ^ index.html [L]
+</IfModule> 

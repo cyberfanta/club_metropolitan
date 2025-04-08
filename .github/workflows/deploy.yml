@@ -36,8 +36,15 @@ jobs:
           cp assets/images/extras/club_metropolitan_logo.svg build/web/assets/images/extras/
           cp assets/images/extras/club_metropolitan_banner.svg build/web/assets/images/extras/
       
-      - name: Create .nojekyll file
-        run: touch build/web/.nojekyll
+      - name: Copy additional files
+        run: |
+          touch build/web/.nojekyll
+          cp web/.htaccess build/web/
+          cp web/404.html build/web/
+          # Ensure README is not used as index
+          echo '<!DOCTYPE html><meta http-equiv="refresh" content="0;URL=index.html">' > build/web/README.md
+          # Create _config.yml to configure GitHub Pages
+          echo 'include: [".htaccess"]' > build/web/_config.yml
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
