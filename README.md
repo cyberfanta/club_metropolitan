@@ -12,6 +12,8 @@ A Flutter application for Club Metropolitan fitness centers that allows members 
 - Handle scheduling conflicts with automatic detection
 - Responsive design for all device sizes
 
+For a complete guide on how to use the application, check the [User Guide](https://github.com/cyberfanta/club_metropolitan/blob/master/USER_GUIDE.md).
+
 ## Screenshots
 
 ### Logo
