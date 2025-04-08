@@ -28,7 +28,7 @@ jobs:
         run: dart run flutter_native_splash:create || echo "Splash screen generation failed, continuing..."
       
       - name: Build web
-        run: flutter build web --release --base-href "/"
+        run: flutter build web --release --base-href "/club_metropolitan/"
       
       - name: Copy assets for social sharing
         run: |
@@ -40,11 +40,15 @@ jobs:
         run: |
           touch build/web/.nojekyll
           echo "DirectoryIndex index.html" > build/web/.htaccess
-          echo "ErrorDocument 404 /index.html" >> build/web/.htaccess
-          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Club Metropolitan</title><script>window.location.href = "/";</script></head><body><h1>Redirecting...</h1><p><a href="/">Click here if not redirected</a></p></body></html>' > build/web/404.html
+          echo "ErrorDocument 404 /club_metropolitan/index.html" >> build/web/.htaccess
+          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Club Metropolitan</title><script>window.location.href = "/club_metropolitan/";</script></head><body><h1>Redirecting...</h1><p><a href="/club_metropolitan/">Click here if not redirected</a></p></body></html>' > build/web/404.html
+          
+          # Fix asset paths for GitHub Pages
+          find build/web -type f -name "*.html" -exec sed -i 's|href="/"|href="/club_metropolitan/"|g' {} \;
+          find build/web -type f -name "*.html" -exec sed -i 's|src="/"|src="/club_metropolitan/"|g' {} \;
           
           # Add banner and social media preview info
-          sed -i 's|</head>|<meta property="og:image" content="assets/images/extras/club_metropolitan_banner.svg" />\n<meta property="og:title" content="Club Metropolitan" />\n<meta property="og:description" content="Fitness Activities App - Developed by Julio César León" />\n</head>|g' build/web/index.html
+          sed -i 's|</head>|<meta property="og:image" content="/club_metropolitan/assets/images/extras/club_metropolitan_banner.svg" />\n<meta property="og:title" content="Club Metropolitan" />\n<meta property="og:description" content="Fitness Activities App - Developed by Julio César León" />\n</head>|g' build/web/index.html
       
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
