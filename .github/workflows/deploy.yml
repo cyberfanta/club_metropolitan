@@ -5,6 +5,12 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,10 +42,25 @@ jobs:
       - name: Copy additional files
         run: |
           touch build/web/.nojekyll
-          cp web/.htaccess build/web/
-          cp web/404.html build/web/
+          
+          # Create .htaccess if not exists
+          if [ ! -f web/.htaccess ]; then
+            echo "DirectoryIndex index.html" > build/web/.htaccess
+            echo "ErrorDocument 404 /club_metropolitan/index.html" >> build/web/.htaccess
+          else
+            cp web/.htaccess build/web/
+          fi
+          
+          # Create 404.html if not exists
+          if [ ! -f web/404.html ]; then
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Club Metropolitan</title><script>window.location.href = "/club_metropolitan/";</script></head><body><h1>Redirecting...</h1><p><a href="/club_metropolitan/">Click here if not redirected</a></p></body></html>' > build/web/404.html
+          else
+            cp web/404.html build/web/
+          fi
+          
           # Ensure README is not used as index
           echo '<!DOCTYPE html><meta http-equiv="refresh" content="0;URL=index.html">' > build/web/README.md
+          
           # Create _config.yml to configure GitHub Pages
           echo 'include: [".htaccess"]' > build/web/_config.yml
       
@@ -48,4 +69,5 @@ jobs:
         with:
           folder: build/web
           branch: gh-pages
-          clean: true 
+          clean: true
+          token: ${{ secrets.GITHUB_TOKEN }} 
