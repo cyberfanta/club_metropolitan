@@ -93,12 +93,12 @@ The application features a modern and clean UI with:
 
 Logo
 <div style="display: flex; justify-content: center;">
-    <img src="https://github.com/cyberfanta/club_metropolitan/blob/main/assets/images/extras/club_metropolitan_logo.svg" height="100"/>
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_logo.svg" height="100"/>
 </div>
 
 Banner
 <div style="display: flex; justify-content: center;">
-    <img src="https://github.com/cyberfanta/club_metropolitan/blob/main/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
+    <img src="https://github.com/cyberfanta/club_metropolitan/blob/master/assets/images/extras/club_metropolitan_banner.svg" width="600"/>
 </div>
 
 ## Author ✒️
