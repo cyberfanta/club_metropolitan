@@ -45,6 +45,7 @@ class ActivityDetailModal extends StatelessWidget {
             : isMediumScreen
             ? 24
             : 16;
+
     final double maxWidth =
         isWideScreen
             ? 900
@@ -58,8 +59,13 @@ class ActivityDetailModal extends StatelessWidget {
         : size.height * 0.85; // 85% in normal mode
 
     double lineSideMargin = (size.width - 30) / 2;
-    double buttonSideMargin = (size.width - (isMobileLandscape ? maxWidth * 0.9 : maxWidth * 0.8)) / 2;
+    // Use a fixed width for the button that is sufficient to display the text in a single line
+    // The minimum width will be 280px and will adjust depending on the screen size
+    double buttonWidth = isWideScreen ? 400 : isMediumScreen ? 350 : 280;
 
+    // Make sure the button is not wider than the modal minus a margin
+    buttonWidth = buttonWidth > (maxWidth - 32) ? (maxWidth - 32) : buttonWidth;
+    
     return Container(
       width: maxWidth,
       constraints: BoxConstraints(
@@ -394,32 +400,37 @@ class ActivityDetailModal extends StatelessWidget {
 
           // Action button - adjusted for landscape mode
           Positioned(
-              bottom: 24,
-            left: buttonSideMargin,
-            right: buttonSideMargin,
-            child: SizedBox(
-              width: isMobileLandscape ? maxWidth * 0.7 : maxWidth * 0.8,
-              child: ElevatedButton(
-                onPressed: onAction,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _useCases.getActionButtonColor(
-                    isUserEnrolled,
-                    conflictingActivity,
-                    adjustOpacity(cGreen, .7),
-                    cRedError,
-                    cOrange,
+            bottom: 24,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SizedBox(
+                width: buttonWidth,
+                child: ElevatedButton(
+                  onPressed: onAction,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _useCases.getActionButtonColor(
+                      isUserEnrolled,
+                      conflictingActivity,
+                      adjustOpacity(cGreen, .7),
+                      cRedError,
+                      cOrange,
+                    ),
+                    foregroundColor: cWhite,
+                    padding: EdgeInsets.symmetric(
+                      vertical: isMobileLandscape ? 12 : 16,
+                    ),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    minimumSize: Size(buttonWidth, 0), // Set minimum width
                   ),
-                  foregroundColor: cWhite,
-                  padding: EdgeInsets.symmetric(
-                    vertical: isMobileLandscape ? 12 : 16,
+                  child: Text(
+                    actionLabel,
+                    style: styleSemiBold(color: cWhite),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis, // Prevent text overflow
                   ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                child: Text(
-                  actionLabel,
-                  style: styleSemiBold(color: cWhite),
                 ),
               ),
             ),
